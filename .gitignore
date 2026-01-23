@@ -1,0 +1,109 @@
+# Security - Never commit secrets or credentials
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+*.secret
+*_secret*
+*password*
+*credential*
+kubeconfig
+.kube/
+*.kubeconfig
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+.uv/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.dylib
+vendor/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Kubernetes
+*.decoded
+helm-charts/**/charts/
+
+# Build artifacts
+bin/
+out/
+target/
+*.log
+
+# Test artifacts
+coverage/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
