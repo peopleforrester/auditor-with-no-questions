@@ -1,0 +1,19 @@
+# ABOUTME: Service for demo target application
+# ABOUTME: Exposes the demo app within the cluster
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-target
+  namespace: demo
+  labels:
+    app: demo-target
+    app.kubernetes.io/name: demo-target
+spec:
+  selector:
+    app: demo-target
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  type: ClusterIP

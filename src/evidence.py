@@ -5,6 +5,7 @@
 
 import hashlib
 import json
+import subprocess
 import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -14,6 +15,22 @@ from typing import Any
 from rich.console import Console
 
 from src.utils import create_progress, print_error, print_success
+
+
+def get_kubernetes_client():
+    """Get Kubernetes API client.
+
+    Returns:
+        CoreV1Api client instance
+    """
+    from kubernetes import client, config
+
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+
+    return client.CoreV1Api()
 
 
 @dataclass
@@ -333,3 +350,187 @@ def verify_evidence(package_path: str) -> None:
         print_error("Invalid ZIP file")
     except Exception as e:
         print_error(f"Verification failed: {e}")
+
+
+# Test-compatible function aliases and wrappers
+
+
+def collect_falco_alerts(days: int = 30) -> list[dict[str, Any]]:
+    """Collect Falco alerts (test-compatible alias).
+
+    Args:
+        days: Number of days of history
+
+    Returns:
+        List of Falco alert records
+    """
+    return get_falco_alerts(days)
+
+
+def collect_argocd_sync_history(days: int = 30) -> list[dict[str, Any]]:
+    """Collect ArgoCD sync history (test-compatible alias).
+
+    Args:
+        days: Number of days of history
+
+    Returns:
+        List of ArgoCD sync records
+    """
+    return get_argocd_sync_history(days)
+
+
+def collect_kyverno_reports() -> list[dict[str, Any]]:
+    """Collect Kyverno reports (test-compatible alias).
+
+    Returns:
+        List of policy report records
+    """
+    return get_kyverno_reports()
+
+
+def collect_git_history(days: int = 30) -> list[dict[str, Any]]:
+    """Collect git history (test-compatible alias).
+
+    Args:
+        days: Number of days of history
+
+    Returns:
+        List of git commit records
+    """
+    return get_git_history(days)
+
+
+def generate_manifest(evidence_data: dict[str, list]) -> dict[str, Any]:
+    """Generate evidence package manifest.
+
+    Args:
+        evidence_data: Dict containing evidence lists
+
+    Returns:
+        Manifest dict with metadata and file info
+    """
+    counts = {
+        "falco_alerts": len(evidence_data.get("falco_alerts", [])),
+        "argocd_history": len(evidence_data.get("argocd_history", [])),
+        "kyverno_reports": len(evidence_data.get("kyverno_reports", [])),
+        "git_history": len(evidence_data.get("git_history", [])),
+    }
+
+    return {
+        "generated_at": datetime.utcnow().isoformat(),
+        "evidence_files": [
+            "falco/alerts.json",
+            "argocd/sync-history.json",
+            "kyverno/policy-reports.json",
+            "git/commit-history.json",
+        ],
+        "counts": counts,
+    }
+
+
+def create_evidence_package(evidence_data: dict[str, list], output_path: str) -> None:
+    """Create evidence ZIP package (test-compatible interface).
+
+    Args:
+        evidence_data: Dict containing evidence lists
+        output_path: Output file path for the ZIP
+    """
+    with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Write Falco alerts
+        falco_content = json.dumps(
+            evidence_data.get("falco_alerts", []), indent=2, default=str
+        ).encode()
+        zf.writestr("falco/alerts.json", falco_content)
+
+        # Write ArgoCD history
+        argocd_content = json.dumps(
+            evidence_data.get("argocd_history", []), indent=2, default=str
+        ).encode()
+        zf.writestr("argocd/sync-history.json", argocd_content)
+
+        # Write Kyverno reports
+        kyverno_content = json.dumps(
+            evidence_data.get("kyverno_reports", []), indent=2, default=str
+        ).encode()
+        zf.writestr("kyverno/policy-reports.json", kyverno_content)
+
+        # Write git history
+        git_content = json.dumps(
+            evidence_data.get("git_history", []), indent=2, default=str
+        ).encode()
+        zf.writestr("git/commit-history.json", git_content)
+
+        # Write manifest
+        manifest = generate_manifest(evidence_data)
+        manifest_content = json.dumps(manifest, indent=2).encode()
+        zf.writestr("manifest.json", manifest_content)
+
+        # Write README
+        readme_content = f"""# Evidence Package
+
+Generated: {manifest['generated_at']}
+
+## Contents
+
+- manifest.json - Package manifest
+- falco/alerts.json - Runtime security alerts
+- argocd/sync-history.json - GitOps deployment history
+- kyverno/policy-reports.json - Policy compliance reports
+- git/commit-history.json - Git commit history
+""".encode()
+        zf.writestr("README.md", readme_content)
+
+
+def verify_evidence_package(package_path: str) -> dict[str, Any]:
+    """Verify an evidence package (test-compatible interface).
+
+    Args:
+        package_path: Path to the evidence package ZIP
+
+    Returns:
+        Dict with valid, integrity, and optional error/missing_files keys
+    """
+    required_files = [
+        "manifest.json",
+        "falco/alerts.json",
+        "argocd/sync-history.json",
+        "kyverno/policy-reports.json",
+        "git/commit-history.json",
+        "README.md",
+    ]
+
+    if not Path(package_path).exists():
+        return {
+            "valid": False,
+            "integrity": "failed",
+            "error": f"Package not found: {package_path}",
+        }
+
+    try:
+        with zipfile.ZipFile(package_path, "r") as zf:
+            names = zf.namelist()
+
+            missing = [f for f in required_files if f not in names]
+            if missing:
+                return {
+                    "valid": False,
+                    "integrity": "incomplete",
+                    "missing_files": missing,
+                }
+
+            return {
+                "valid": True,
+                "integrity": "verified",
+            }
+    except zipfile.BadZipFile:
+        return {
+            "valid": False,
+            "integrity": "failed",
+            "error": "Invalid ZIP file",
+        }
+    except Exception as e:
+        return {
+            "valid": False,
+            "integrity": "failed",
+            "error": str(e),
+        }

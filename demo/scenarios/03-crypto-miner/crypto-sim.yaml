@@ -1,0 +1,60 @@
+# ABOUTME: Safe crypto miner simulation for demo purposes
+# ABOUTME: Triggers Falco detection without any actual mining
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: crypto-sim
+  namespace: demo
+  labels:
+    app: crypto-sim
+    app.kubernetes.io/name: crypto-sim
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+    demo-scenario: crypto-miner
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: crypto-sim
+        app.kubernetes.io/name: crypto-sim
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: miner-sim
+          image: busybox:1.36
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Starting crypto miner simulation..."
+              echo "This is a SAFE simulation for demo purposes"
+              echo ""
+
+              # Create a symlink to simulate xmrig process name
+              # This triggers Falco's crypto mining detection
+              cp /bin/sh /tmp/xmrig
+
+              # Run with mining-like arguments (but does nothing)
+              # The stratum+tcp pattern triggers Falco
+              /tmp/xmrig -c "echo 'Simulated connection to stratum+tcp://pool.demo.local:3333'"
+
+              echo ""
+              echo "Simulation complete - Falco should have detected this"
+              echo "No actual mining occurred"
+
+              # Keep running briefly so the pod can be inspected
+              sleep 30
+
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: false

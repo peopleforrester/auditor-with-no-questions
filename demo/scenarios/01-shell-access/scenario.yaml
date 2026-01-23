@@ -1,0 +1,53 @@
+# ABOUTME: Shell access demo scenario metadata
+# ABOUTME: Defines the scenario for Python CLI orchestration
+
+name: shell-access
+title: Shell Access Detection
+description: |
+  Demonstrates Falco detecting interactive shell access to a container.
+  This is a common compliance requirement for NIS2 and DORA.
+
+duration: "30s"
+
+# Prerequisites check
+prerequisites:
+  - component: falco
+    check: pods_running
+  - component: demo-target
+    check: pod_exists
+
+# Steps executed by the demo command
+steps:
+  - name: verify-target
+    description: "Verify target pod exists"
+    action: check_pod
+    params:
+      namespace: demo
+      label_selector: "app=demo-target"
+
+  - name: exec-shell
+    description: "Execute shell command in container"
+    action: kubectl_exec
+    params:
+      namespace: demo
+      pod_selector: "app=demo-target"
+      command: ["/bin/sh", "-c", "echo 'compliance-audit-test'"]
+
+  - name: wait-alert
+    description: "Wait for Falco alert"
+    action: wait_falco_alert
+    params:
+      rule: "Terminal Shell in Container"
+      timeout: 30
+
+# Expected outcomes
+expected:
+  falco_alert:
+    rule: "Terminal Shell in Container"
+    priority: WARNING
+    tags:
+      - mitre_execution
+      - T1059
+      - NIS2_access_control
+      - DORA_incident_detection
+      - SOC2_CC6.1

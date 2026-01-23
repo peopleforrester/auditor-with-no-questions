@@ -1,0 +1,46 @@
+# ABOUTME: Evidence export demo scenario
+# ABOUTME: Generates compliance evidence package for auditors
+
+name: evidence-export
+title: Evidence Package Export
+description: |
+  Demonstrates generating a complete compliance evidence package.
+  The auditor asks "Where's my evidence?" - here it is.
+
+  Package includes:
+  - Falco alerts with compliance tags
+  - ArgoCD sync history (GitOps audit trail)
+  - Kyverno policy reports
+  - Git commit history
+
+duration: "15s"
+
+prerequisites:
+  - component: cluster
+    check: connected
+
+steps:
+  - name: export-evidence
+    description: "Generate evidence package"
+    action: evidence_export
+    params:
+      days: 90
+      output: evidence-package.zip
+
+  - name: verify-package
+    description: "Verify package integrity"
+    action: evidence_verify
+    params:
+      package: evidence-package.zip
+
+expected:
+  package:
+    files:
+      - manifest.json
+      - falco/alerts.json
+      - argocd/sync-history.json
+      - kyverno/policy-reports.json
+      - git/commit-history.json
+      - README.md
+
+    integrity: verified

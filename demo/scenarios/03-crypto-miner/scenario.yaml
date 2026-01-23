@@ -1,0 +1,82 @@
+# ABOUTME: Crypto miner response chain demo scenario
+# ABOUTME: The "holy shit" moment - full automated response in <30 seconds
+
+name: crypto-miner
+title: Crypto Miner Response Chain
+description: |
+  THE "HOLY SHIT" MOMENT - Demonstrates the full automated response chain:
+  1. Deploy simulated crypto miner
+  2. Falco detects behavior pattern
+  3. Alert fires with compliance tags
+  4. Falcosidekick triggers Argo Workflow
+  5. Workflow captures forensics, isolates workload, creates ticket
+
+  All in under 30 seconds, fully automated.
+
+duration: "45s"
+
+prerequisites:
+  - component: falco
+    check: pods_running
+  - component: falcosidekick
+    check: pods_running
+  - component: argo-events
+    check: sensor_active
+  - component: argo-workflows
+    check: controller_running
+
+steps:
+  - name: deploy-miner
+    description: "Deploy crypto miner simulation"
+    action: kubectl_apply
+    params:
+      manifest: crypto-sim.yaml
+
+  - name: wait-detection
+    description: "Wait for Falco detection"
+    action: wait_falco_alert
+    params:
+      rule: "Crypto Mining Activity Detected"
+      timeout: 15
+
+  - name: wait-workflow
+    description: "Wait for response workflow"
+    action: wait_workflow
+    params:
+      name_prefix: "forensic-capture-"
+      namespace: argo-workflows
+      timeout: 30
+
+  - name: verify-isolation
+    description: "Verify network isolation applied"
+    action: check_network_policy
+    params:
+      namespace: demo
+      name_prefix: "isolate-"
+
+expected:
+  falco_alert:
+    rule: "Crypto Mining Activity Detected"
+    priority: CRITICAL
+    tags:
+      - cryptomining
+      - mitre_resource_hijacking
+      - T1496
+      - NIS2_threat_detection
+      - DORA_cyber_threat
+      - SOVEREIGNTY_WORKLOAD_INTEGRITY
+
+  workflow:
+    status: Succeeded
+    artifacts:
+      - evidence.txt
+
+  network_policy:
+    exists: true
+    isolates_pod: true
+
+  timeline:
+    detection: "<5s"
+    workflow_start: "<10s"
+    isolation: "<15s"
+    total: "<30s"

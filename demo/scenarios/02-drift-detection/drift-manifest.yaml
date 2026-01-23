@@ -1,0 +1,16 @@
+# ABOUTME: ConfigMap applied outside GitOps to trigger drift detection
+# ABOUTME: ArgoCD will detect this as OutOfSync
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-config-drift
+  namespace: demo
+  labels:
+    app: demo-target
+    app.kubernetes.io/name: demo-target
+    drift-test: "true"
+data:
+  # This change was made outside GitOps!
+  unauthorized_change: "This config was applied via kubectl, not ArgoCD"
+  timestamp: "applied-during-demo"

@@ -6,11 +6,28 @@
 import json
 import sys
 from dataclasses import asdict, dataclass
+from typing import Any
 
 from rich.console import Console
 from rich.table import Table
 
 from src.utils import print_error, print_success
+
+
+def get_kubernetes_client():
+    """Get Kubernetes API client.
+
+    Returns:
+        CoreV1Api client instance
+    """
+    from kubernetes import client, config
+
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+
+    return client.CoreV1Api()
 
 
 @dataclass
@@ -311,3 +328,136 @@ def run_validate(verbose: bool = False, output_json: bool = False) -> None:
             unhealthy.insert(0, "Cluster")
         print_error(f"Unhealthy components: {', '.join(unhealthy)}")
         sys.exit(1)
+
+
+# Test-compatible health check functions
+
+
+def check_argocd_health() -> dict[str, Any]:
+    """Check ArgoCD health (test-compatible interface).
+
+    Returns:
+        Dict with healthy, component, and message keys
+    """
+    try:
+        k8s = get_kubernetes_client()
+        pods = k8s.list_namespaced_pod(
+            namespace="argocd",
+            label_selector="app.kubernetes.io/name=argocd-server",
+        )
+
+        if not pods.items:
+            return {
+                "healthy": False,
+                "component": "argocd",
+                "message": "No pods found in argocd namespace",
+            }
+
+        running_pods = [p for p in pods.items if p.status.phase == "Running"]
+        return {
+            "healthy": len(running_pods) > 0,
+            "component": "argocd",
+            "message": f"{len(running_pods)}/{len(pods.items)} pods running",
+        }
+    except Exception as e:
+        return {
+            "healthy": False,
+            "component": "argocd",
+            "message": f"Error checking ArgoCD: {e}",
+        }
+
+
+def check_falco_health() -> dict[str, Any]:
+    """Check Falco health (test-compatible interface).
+
+    Returns:
+        Dict with healthy, component, and message keys
+    """
+    try:
+        from kubernetes import client
+
+        apps_v1 = client.AppsV1Api()
+        ds = apps_v1.read_namespaced_daemon_set(
+            name="falco",
+            namespace="falco",
+        )
+
+        desired = ds.status.desired_number_scheduled or 0
+        ready = ds.status.number_ready or 0
+
+        return {
+            "healthy": ready == desired and desired > 0,
+            "component": "falco",
+            "message": f"{ready}/{desired} pods ready",
+        }
+    except Exception as e:
+        return {
+            "healthy": False,
+            "component": "falco",
+            "message": f"Error checking Falco: {e}",
+        }
+
+
+def check_kyverno_health() -> dict[str, Any]:
+    """Check Kyverno health (test-compatible interface).
+
+    Returns:
+        Dict with healthy, component, and message keys
+    """
+    try:
+        from kubernetes import client
+
+        apps_v1 = client.AppsV1Api()
+        deployment = apps_v1.read_namespaced_deployment(
+            name="kyverno",
+            namespace="kyverno",
+        )
+
+        ready = deployment.status.ready_replicas or 0
+        desired = deployment.status.replicas or 0
+
+        return {
+            "healthy": ready == desired and desired > 0,
+            "component": "kyverno",
+            "message": f"{ready}/{desired} replicas ready",
+        }
+    except Exception as e:
+        return {
+            "healthy": False,
+            "component": "kyverno",
+            "message": f"Error checking Kyverno: {e}",
+        }
+
+
+def check_argo_events_health() -> dict[str, Any]:
+    """Check Argo Events health (test-compatible interface).
+
+    Returns:
+        Dict with healthy, component, and message keys
+    """
+    try:
+        k8s = get_kubernetes_client()
+        pods = k8s.list_namespaced_pod(
+            namespace="argo-events",
+            label_selector="app.kubernetes.io/part-of=argo-events",
+        )
+
+        if not pods.items:
+            return {
+                "healthy": False,
+                "component": "argo-events",
+                "message": "No pods found in argo-events namespace",
+            }
+
+        running_pods = [p for p in pods.items if p.status.phase == "Running"]
+        return {
+            "healthy": len(running_pods) > 0,
+            "component": "argo-events",
+            "message": f"{len(running_pods)}/{len(pods.items)} pods running",
+        }
+    except Exception as e:
+        return {
+            "healthy": False,
+            "component": "argo-events",
+            "message": f"Error checking Argo Events: {e}",
+        }

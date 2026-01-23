@@ -1,0 +1,49 @@
+# ABOUTME: Drift detection demo scenario metadata
+# ABOUTME: Shows ArgoCD detecting changes made outside GitOps
+
+name: drift-detection
+title: GitOps Drift Detection
+description: |
+  Demonstrates ArgoCD detecting configuration changes made outside
+  the GitOps workflow (kubectl apply). This proves change management
+  compliance for NIS2 and DORA.
+
+duration: "30s"
+
+prerequisites:
+  - component: argocd
+    check: apps_synced
+  - component: demo-app
+    check: deployment_exists
+
+steps:
+  - name: verify-sync
+    description: "Verify ArgoCD app is synced"
+    action: check_argocd_sync
+    params:
+      app_name: demo-app
+
+  - name: apply-drift
+    description: "Apply out-of-band change"
+    action: kubectl_apply
+    params:
+      manifest: drift-manifest.yaml
+
+  - name: wait-detection
+    description: "Wait for ArgoCD to detect drift"
+    action: wait_argocd_outofsync
+    params:
+      app_name: demo-app
+      timeout: 30
+
+expected:
+  argocd_status:
+    sync: OutOfSync
+    health: Healthy
+  falco_alert:
+    rule: "Non-GitOps Kubernetes Modification"
+    priority: ERROR
+    tags:
+      - k8s_audit
+      - drift_detection
+      - NIS2_change_management
