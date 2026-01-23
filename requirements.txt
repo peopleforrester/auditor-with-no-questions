@@ -1,0 +1,13 @@
+# ABOUTME: Python dependencies for pip compatibility
+# ABOUTME: Use pyproject.toml for full dependency management with uv
+
+# Core dependencies
+click>=8.1.0
+rich>=13.0.0
+kubernetes>=29.0.0
+boto3>=1.34.0
+pyyaml>=6.0
+httpx>=0.27.0
+
+# Development dependencies (install with: pip install -r requirements.txt -r requirements-dev.txt)
+# Or use: pip install -e ".[dev]"

@@ -1,0 +1,89 @@
+# ABOUTME: eksctl cluster configuration (alternative to Terraform)
+# ABOUTME: Creates EKS 1.32 cluster with managed node group in eu-central-1
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: sovereign-demo
+  region: eu-central-1
+  version: "1.32"
+  tags:
+    Project: sovereign-compliance-demo
+    Environment: demo
+    ManagedBy: eksctl
+
+# IAM configuration
+iam:
+  withOIDC: true
+  serviceAccounts:
+    # ArgoCD service account
+    - metadata:
+        name: argocd-server
+        namespace: argocd
+      wellKnownPolicies:
+        autoScaler: false
+    # Falco service account
+    - metadata:
+        name: falco
+        namespace: falco
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+    # Argo Workflows service account
+    - metadata:
+        name: argo-workflows-controller
+        namespace: argo-workflows
+      wellKnownPolicies:
+        autoScaler: false
+
+# VPC configuration
+vpc:
+  cidr: 10.0.0.0/16
+  nat:
+    gateway: Single  # Cost-optimized for demo
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+# Managed node groups
+managedNodeGroups:
+  - name: demo-nodes
+    instanceType: t3.large
+    desiredCapacity: 3
+    minSize: 2
+    maxSize: 5
+    volumeSize: 50
+    volumeType: gp3
+    amiFamily: AmazonLinux2023  # AL2023 for EKS 1.32+
+    labels:
+      role: demo
+    tags:
+      Name: sovereign-demo-node
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        cloudWatch: true
+
+# Addons
+addons:
+  - name: vpc-cni
+    attachPolicyARNs:
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+  - name: coredns
+  - name: kube-proxy
+  - name: eks-pod-identity-agent
+
+# CloudWatch logging
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - api
+      - audit
+      - authenticator
+      - controllerManager
+      - scheduler
+
+# Secrets encryption
+secretsEncryption:
+  keyARN: ""  # Will create new KMS key if empty
