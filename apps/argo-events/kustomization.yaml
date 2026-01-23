@@ -1,0 +1,10 @@
+# ABOUTME: Kustomization for Argo Events resources
+# ABOUTME: Includes EventBus, EventSource, and Sensor
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - eventbus.yaml
+  - event-sources/falco-webhook.yaml
+  - sensors/compliance-response.yaml

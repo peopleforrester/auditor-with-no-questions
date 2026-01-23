@@ -1,0 +1,165 @@
+# ABOUTME: WorkflowTemplate for forensic evidence capture
+# ABOUTME: Captures pod state, logs, and events for compliance evidence
+
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: forensic-capture
+  namespace: argo-workflows
+spec:
+  entrypoint: capture-and-respond
+  serviceAccountName: argo-workflow
+
+  arguments:
+    parameters:
+      - name: alert-rule
+        value: "Unknown Rule"
+      - name: alert-priority
+        value: "WARNING"
+      - name: pod-name
+        value: ""
+      - name: namespace
+        value: "default"
+      - name: output
+        value: ""
+
+  templates:
+    - name: capture-and-respond
+      dag:
+        tasks:
+          - name: capture-state
+            template: kubectl-capture
+            arguments:
+              parameters:
+                - name: pod-name
+                  value: "{{workflow.parameters.pod-name}}"
+                - name: namespace
+                  value: "{{workflow.parameters.namespace}}"
+
+          - name: apply-isolation
+            template: network-isolate
+            dependencies: [capture-state]
+            when: "{{workflow.parameters.alert-priority}} == 'Critical'"
+            arguments:
+              parameters:
+                - name: pod-name
+                  value: "{{workflow.parameters.pod-name}}"
+                - name: namespace
+                  value: "{{workflow.parameters.namespace}}"
+
+          - name: create-incident
+            template: create-ticket
+            dependencies: [capture-state]
+            arguments:
+              parameters:
+                - name: alert-rule
+                  value: "{{workflow.parameters.alert-rule}}"
+                - name: alert-priority
+                  value: "{{workflow.parameters.alert-priority}}"
+                - name: output
+                  value: "{{workflow.parameters.output}}"
+
+    - name: kubectl-capture
+      inputs:
+        parameters:
+          - name: pod-name
+          - name: namespace
+      container:
+        image: bitnami/kubectl:1.32
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "=== FORENSIC CAPTURE ===" | tee /tmp/evidence.txt
+            echo "Timestamp: $(date -u --iso-8601=seconds)" | tee -a /tmp/evidence.txt
+            echo "Pod: {{inputs.parameters.pod-name}}" | tee -a /tmp/evidence.txt
+            echo "Namespace: {{inputs.parameters.namespace}}" | tee -a /tmp/evidence.txt
+            echo "" | tee -a /tmp/evidence.txt
+
+            if [ -n "{{inputs.parameters.pod-name}}" ]; then
+              echo "=== POD DESCRIBE ===" | tee -a /tmp/evidence.txt
+              kubectl describe pod {{inputs.parameters.pod-name}} -n {{inputs.parameters.namespace}} 2>&1 | tee -a /tmp/evidence.txt
+              echo "" | tee -a /tmp/evidence.txt
+
+              echo "=== POD LOGS (last 100 lines) ===" | tee -a /tmp/evidence.txt
+              kubectl logs {{inputs.parameters.pod-name}} -n {{inputs.parameters.namespace}} --tail=100 2>&1 | tee -a /tmp/evidence.txt
+              echo "" | tee -a /tmp/evidence.txt
+
+              echo "=== EVENTS ===" | tee -a /tmp/evidence.txt
+              kubectl get events -n {{inputs.parameters.namespace}} --field-selector involvedObject.name={{inputs.parameters.pod-name}} 2>&1 | tee -a /tmp/evidence.txt
+            else
+              echo "No pod name provided - skipping pod-specific capture" | tee -a /tmp/evidence.txt
+            fi
+
+            echo "" | tee -a /tmp/evidence.txt
+            echo "=== CAPTURE COMPLETE ===" | tee -a /tmp/evidence.txt
+            cat /tmp/evidence.txt
+      outputs:
+        artifacts:
+          - name: evidence
+            path: /tmp/evidence.txt
+            archive:
+              none: {}
+
+    - name: network-isolate
+      inputs:
+        parameters:
+          - name: pod-name
+          - name: namespace
+      container:
+        image: bitnami/kubectl:1.32
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Applying network isolation for {{inputs.parameters.pod-name}}"
+
+            # Create deny-all NetworkPolicy
+            cat <<EOF | kubectl apply -f -
+            apiVersion: networking.k8s.io/v1
+            kind: NetworkPolicy
+            metadata:
+              name: isolate-{{inputs.parameters.pod-name}}
+              namespace: {{inputs.parameters.namespace}}
+              labels:
+                app.kubernetes.io/managed-by: argo-workflows
+                compliance.sovereign-demo/action: isolation
+            spec:
+              podSelector:
+                matchLabels:
+                  isolated-by-workflow: "true"
+              policyTypes:
+                - Ingress
+                - Egress
+            EOF
+
+            # Label the pod for isolation (if it exists)
+            if [ -n "{{inputs.parameters.pod-name}}" ]; then
+              kubectl label pod {{inputs.parameters.pod-name}} -n {{inputs.parameters.namespace}} \
+                isolated-by-workflow=true --overwrite 2>/dev/null || echo "Pod not found or already labeled"
+            fi
+
+            echo "Network isolation applied"
+
+    - name: create-ticket
+      inputs:
+        parameters:
+          - name: alert-rule
+          - name: alert-priority
+          - name: output
+      container:
+        image: curlimages/curl:8.5.0
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Creating incident ticket"
+            echo "Rule: {{inputs.parameters.alert-rule}}"
+            echo "Priority: {{inputs.parameters.alert-priority}}"
+            echo "Output: {{inputs.parameters.output}}"
+            echo ""
+            echo "Incident ID: INC-$(date +%Y%m%d%H%M%S)"
+            echo "Created at: $(date -u --iso-8601=seconds)"
+            echo ""
+            echo "In production, this would call:"
+            echo "  - PagerDuty API"
+            echo "  - ServiceNow API"
+            echo "  - Jira API"
+            echo "  - Slack webhook"

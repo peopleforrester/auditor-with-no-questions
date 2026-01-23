@@ -1,0 +1,11 @@
+# ABOUTME: Kustomization for Kyverno policies
+# ABOUTME: Includes all policy directories
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - policies/validating/require-labels.yaml
+  - policies/validating/require-resources.yaml
+  - policies/image-validating/verify-signatures.yaml
+  - policies/legacy/disallow-privileged.yaml

@@ -1,0 +1,83 @@
+# ABOUTME: Kyverno Helm values for 1.16.x with policy reporting
+# ABOUTME: Enables background scanning and admission controller
+
+# Admission controller settings
+admissionController:
+  replicas: 3
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Service account
+  serviceAccount:
+    create: true
+    name: kyverno-admission-controller
+
+# Background controller for policy reports
+backgroundController:
+  enabled: true
+  replicas: 2
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# Cleanup controller
+cleanupController:
+  enabled: true
+  replicas: 1
+
+# Reports controller for policy reports
+reportsController:
+  enabled: true
+  replicas: 1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# Configuration
+config:
+  # Create policy reports
+  resourceFilters:
+    - "[*,kube-system,*]"
+    - "[*,kube-public,*]"
+    - "[*,kube-node-lease,*]"
+    - "[*,argocd,*]"
+
+  # Enable background scanning
+  generateSuccessEvents: true
+
+  # Webhook timeout
+  webhookTimeoutSeconds: 30
+
+# Feature flags
+features:
+  # Enable CEL-based policies (Kyverno 1.14+)
+  admissionReports:
+    enabled: true
+  backgroundScan:
+    enabled: true
+    backgroundScanInterval: 1h
+  logging:
+    format: json
+  policyReports:
+    enabled: true
+
+# Metrics
+metricsConfig:
+  metricsExposure:
+    enabled: true

@@ -1,0 +1,194 @@
+# ABOUTME: Falco Helm values for 0.41.x with modern-bpf driver
+# ABOUTME: Configures JSON output and falcosidekick integration
+
+# Use modern-bpf driver (CO-RE) - requires kernel 5.8+ with BTF
+driver:
+  kind: modern-bpf
+
+# Falco configuration
+falco:
+  # JSON output for structured logging
+  json_output: true
+  json_include_output_property: true
+  json_include_tags_property: true
+
+  # Buffered outputs for performance
+  buffered_outputs: true
+
+  # Grpc output for falcosidekick
+  grpc:
+    enabled: true
+    bind_address: "0.0.0.0:5060"
+    threadiness: 8
+
+  grpc_output:
+    enabled: true
+
+  # Log level
+  log_level: info
+
+  # Priority filter - capture warnings and above
+  priority: warning
+
+  # Rules files
+  rules_file:
+    - /etc/falco/falco_rules.yaml
+    - /etc/falco/falco_rules.local.yaml
+    - /etc/falco/rules.d
+
+# Falcoctl for automatic rule updates
+falcoctl:
+  artifact:
+    install:
+      enabled: true
+    follow:
+      enabled: true
+      every: 6h
+  config:
+    artifact:
+      allowedTypes:
+        - rulesfile
+        - plugin
+      install:
+        refs:
+          - falco-rules:3
+          - k8saudit-rules:0.7
+
+# Custom rules (mounted as ConfigMap)
+customRules:
+  compliance-rules.yaml: |
+    # Terminal Shell in Container with compliance tags
+    - rule: Terminal Shell in Container
+      desc: Detect interactive shell sessions in containers
+      condition: >
+        spawned_process and container and
+        shell_procs and proc.tty != 0
+      output: >
+        Shell spawned in container
+        (user=%user.name container=%container.name shell=%proc.name
+         parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty
+         namespace=%k8s.ns.name pod=%k8s.pod.name)
+      priority: WARNING
+      tags:
+        - container
+        - shell
+        - mitre_execution
+        - T1059
+        - NIS2_access_control
+        - DORA_incident_detection
+        - SOC2_CC6.1
+
+    # Crypto Mining Activity
+    - rule: Crypto Mining Activity Detected
+      desc: Detect processes commonly associated with crypto mining
+      condition: >
+        spawned_process and container and
+        (proc.name in (xmrig, minerd, minergate, cpuminer, cgminer, bfgminer) or
+         proc.cmdline contains "stratum+tcp" or
+         proc.cmdline contains "nicehash" or
+         proc.cmdline contains "cryptonight")
+      output: >
+        Crypto mining activity detected
+        (container=%container.name proc=%proc.name cmdline=%proc.cmdline
+         image=%container.image.repository namespace=%k8s.ns.name pod=%k8s.pod.name)
+      priority: CRITICAL
+      tags:
+        - container
+        - cryptomining
+        - mitre_resource_hijacking
+        - T1496
+        - NIS2_threat_detection
+        - DORA_cyber_threat
+        - SOVEREIGNTY_WORKLOAD_INTEGRITY
+
+    # Sensitive File Access
+    - rule: Sensitive File Access in Container
+      desc: Detect access to sensitive files in containers
+      condition: >
+        open_read and container and
+        (fd.name startswith /etc/shadow or
+         fd.name startswith /etc/passwd or
+         fd.name startswith /root/.ssh or
+         fd.name startswith /etc/kubernetes)
+      output: >
+        Sensitive file accessed in container
+        (user=%user.name file=%fd.name container=%container.name
+         namespace=%k8s.ns.name pod=%k8s.pod.name)
+      priority: WARNING
+      tags:
+        - container
+        - file_access
+        - mitre_credential_access
+        - T1552
+        - NIS2_access_control
+        - DORA_data_protection
+        - SOC2_CC6.1
+
+  sovereignty-rules.yaml: |
+    # Non-GitOps Kubectl Operations (Drift Detection)
+    # Requires K8s Audit Logs enabled
+    - rule: Non-GitOps Kubernetes Modification
+      desc: Detect kubectl operations outside of GitOps workflow
+      condition: >
+        kevt and
+        ka.verb in (create, update, patch, delete) and
+        not ka.user.name startswith "system:serviceaccount:argocd:" and
+        not ka.user.name startswith "system:serviceaccount:kube-system:" and
+        not ka.user.name = "system:admin" and
+        ka.target.resource in (deployments, services, configmaps, secrets, pods)
+      output: >
+        Non-GitOps modification detected
+        (user=%ka.user.name verb=%ka.verb resource=%ka.target.resource
+         namespace=%ka.target.namespace name=%ka.target.name)
+      priority: ERROR
+      source: k8s_audit
+      tags:
+        - k8s_audit
+        - drift_detection
+        - NIS2_change_management
+        - DORA_change_control
+        - SOC2_CC8.1
+        - SOVEREIGNTY_AUDIT_TRAIL
+
+    # Privilege Escalation Attempt
+    - rule: Container Privilege Escalation Attempt
+      desc: Detect attempts to escalate privileges in containers
+      condition: >
+        spawned_process and container and
+        (proc.name in (sudo, su, doas) or
+         proc.cmdline contains "chmod +s" or
+         proc.cmdline contains "setuid")
+      output: >
+        Privilege escalation attempt in container
+        (user=%user.name proc=%proc.name cmdline=%proc.cmdline
+         container=%container.name namespace=%k8s.ns.name pod=%k8s.pod.name)
+      priority: CRITICAL
+      tags:
+        - container
+        - privilege_escalation
+        - mitre_privilege_escalation
+        - T1548
+        - NIS2_access_control
+        - DORA_security_control
+        - SOC2_CC6.1
+
+# Service account for IRSA (if using AWS)
+serviceAccount:
+  create: true
+  name: falco
+  annotations: {}
+    # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/falco-role
+
+# Resource limits
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+
+# Tolerations to run on all nodes
+tolerations:
+  - effect: NoSchedule
+    operator: Exists

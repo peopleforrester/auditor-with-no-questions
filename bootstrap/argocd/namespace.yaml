@@ -1,0 +1,10 @@
+# ABOUTME: Namespace definition for ArgoCD installation
+# ABOUTME: Creates argocd namespace with appropriate labels
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  labels:
+    app.kubernetes.io/name: argocd
+    app.kubernetes.io/part-of: sovereign-compliance-demo

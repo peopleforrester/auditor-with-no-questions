@@ -1,0 +1,46 @@
+# ABOUTME: ArgoCD Application for Argo Events deployment
+# ABOUTME: Event-driven automation for Falco alert response
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-events
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-events
+    targetRevision: 2.4.0
+    helm:
+      releaseName: argo-events
+      values: |
+        controller:
+          replicas: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+
+        webhook:
+          enabled: true
+          port: 12000
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo-events
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

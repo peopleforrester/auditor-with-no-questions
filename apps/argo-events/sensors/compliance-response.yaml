@@ -1,0 +1,79 @@
+# ABOUTME: Sensor for compliance response to Falco alerts
+# ABOUTME: Triggers Argo Workflows for forensic capture and isolation
+
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: compliance-response
+  namespace: argo-events
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: falco-alert
+      eventSourceName: falco
+      eventName: falco
+      filters:
+        data:
+          # Only trigger on WARNING, ERROR, or CRITICAL alerts
+          - path: priority
+            type: string
+            comparator: "!="
+            value:
+              - "Debug"
+              - "Informational"
+              - "Notice"
+
+  triggers:
+    # Trigger forensic capture workflow for CRITICAL alerts
+    - template:
+        name: forensic-capture
+        conditions: "falco-alert"
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: forensic-capture-
+                namespace: argo-workflows
+              spec:
+                workflowTemplateRef:
+                  name: forensic-capture
+                arguments:
+                  parameters:
+                    - name: alert-rule
+                      value: ""
+                    - name: alert-priority
+                      value: ""
+                    - name: pod-name
+                      value: ""
+                    - name: namespace
+                      value: ""
+                    - name: output
+                      value: ""
+          parameters:
+            - src:
+                dependencyName: falco-alert
+                dataKey: body.rule
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: falco-alert
+                dataKey: body.priority
+              dest: spec.arguments.parameters.1.value
+            - src:
+                dependencyName: falco-alert
+                dataKey: body.output_fields.k8s.pod.name
+              dest: spec.arguments.parameters.2.value
+            - src:
+                dependencyName: falco-alert
+                dataKey: body.output_fields.k8s.ns.name
+              dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: falco-alert
+                dataKey: body.output
+              dest: spec.arguments.parameters.4.value
+      retryStrategy:
+        steps: 3
+        duration: 5s

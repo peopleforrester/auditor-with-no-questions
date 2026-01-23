@@ -1,0 +1,34 @@
+# ABOUTME: ArgoCD Application for Falcosidekick deployment
+# ABOUTME: Routes Falco alerts to multiple outputs including Argo Events
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: falcosidekick
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://falcosecurity.github.io/charts
+    chart: falcosidekick
+    targetRevision: 0.7.0
+    helm:
+      releaseName: falcosidekick
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: falco
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

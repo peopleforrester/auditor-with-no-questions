@@ -1,0 +1,53 @@
+# ABOUTME: Namespace definitions for all demo components
+# ABOUTME: Created in sync wave 0 before any workloads
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falco
+  labels:
+    app.kubernetes.io/name: falco
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kyverno
+  labels:
+    app.kubernetes.io/name: kyverno
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-events
+  labels:
+    app.kubernetes.io/name: argo-events
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argo-workflows
+  labels:
+    app.kubernetes.io/name: argo-workflows
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/name: monitoring
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+  labels:
+    app.kubernetes.io/name: demo
+    app.kubernetes.io/part-of: sovereign-compliance-demo
+    # Label for Kyverno policy testing
+    compliance.sovereign-demo/enforce: "true"

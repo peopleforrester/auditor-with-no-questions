@@ -1,0 +1,57 @@
+# ABOUTME: ArgoCD Application for Argo Workflows 3.6.x deployment
+# ABOUTME: Workflow engine for automated compliance response
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-workflows
+    targetRevision: 0.41.0  # Supports Argo Workflows 3.6.x
+    helm:
+      releaseName: argo-workflows
+      values: |
+        controller:
+          replicas: 1
+          workflowNamespaces:
+            - argo-workflows
+            - default
+            - demo
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+        server:
+          replicas: 1
+          enabled: true
+          extraArgs:
+            - --auth-mode=server
+
+        workflow:
+          serviceAccount:
+            create: true
+            name: argo-workflow
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo-workflows
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

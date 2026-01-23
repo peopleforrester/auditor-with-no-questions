@@ -1,0 +1,8 @@
+# ABOUTME: Kustomization for all namespaces used by the demo
+# ABOUTME: Creates namespaces with appropriate labels
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespaces.yaml

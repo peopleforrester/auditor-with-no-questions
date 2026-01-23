@@ -1,0 +1,65 @@
+# ABOUTME: CEL-based ValidatingPolicy requiring standard Kubernetes labels
+# ABOUTME: Enforces app.kubernetes.io labels on Deployments for compliance
+
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-labels
+  annotations:
+    policies.kyverno.io/title: Require Labels
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod, Deployment
+    policies.kyverno.io/description: >-
+      Requires standard Kubernetes labels on Deployments for compliance tracking.
+      Labels help identify workloads for auditing and GitOps management.
+    compliance.sovereign-demo/frameworks: "NIS2,DORA,SOC2"
+    compliance.sovereign-demo/controls: "NIS2-21,DORA-II,SOC2-CC6.1"
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: check-required-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+              namespaceSelector:
+                matchLabels:
+                  compliance.sovereign-demo/enforce: "true"
+      validate:
+        cel:
+          expressions:
+            - expression: >-
+                has(object.metadata.labels) &&
+                'app.kubernetes.io/name' in object.metadata.labels
+              message: "Deployments must have 'app.kubernetes.io/name' label"
+
+            - expression: >-
+                has(object.metadata.labels) &&
+                'app.kubernetes.io/managed-by' in object.metadata.labels
+              message: "Deployments must have 'app.kubernetes.io/managed-by' label"
+
+    - name: check-pod-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaceSelector:
+                matchLabels:
+                  compliance.sovereign-demo/enforce: "true"
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - kube-public
+      validate:
+        cel:
+          expressions:
+            - expression: >-
+                has(object.metadata.labels) &&
+                'app.kubernetes.io/name' in object.metadata.labels
+              message: "Pods must have 'app.kubernetes.io/name' label"

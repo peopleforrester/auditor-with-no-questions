@@ -1,0 +1,8 @@
+# ABOUTME: Kustomization for Argo Workflows resources
+# ABOUTME: Includes WorkflowTemplates for compliance response
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - templates/forensic-capture.yaml

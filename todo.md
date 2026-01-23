@@ -41,63 +41,62 @@ KubeCon EU 2026 OpenSovereign Day Demo
 
 ---
 
-## Phase 2: ArgoCD 3.2.x Bootstrap
+## Phase 2: ArgoCD 3.2.x Bootstrap ✅
 
-### Task 2.1: ArgoCD Installation
-- [ ] Create bootstrap/argocd/namespace.yaml
-- [ ] Create bootstrap/argocd/kustomization.yaml
-- [ ] Create bootstrap/argocd/argocd-cm.yaml (3.x config)
+### Task 2.1: ArgoCD Installation ✅
+- [x] Create bootstrap/argocd/namespace.yaml
+- [x] Create bootstrap/argocd/kustomization.yaml
+- [x] Create bootstrap/argocd/argocd-cm-patch.yaml (3.x config)
+- [x] Create bootstrap/argocd/argocd-cmd-params-cm-patch.yaml
 
-### Task 2.2: App-of-Apps
-- [ ] Create bootstrap/app-of-apps/root-app.yaml
-- [ ] Create bootstrap/app-of-apps/applicationset.yaml (sync waves)
-
----
-
-## Phase 3: Falco 0.41.x + Detection
-
-### Task 3.1: Falco Installation
-- [ ] Create apps/falco/application.yaml
-- [ ] Create apps/falco/values.yaml (modern-bpf driver)
-
-### Task 3.2: Compliance-Tagged Rules
-- [ ] Create apps/falco/rules/compliance-rules.yaml
-- [ ] Create apps/falco/rules/sovereignty-rules.yaml
+### Task 2.2: App-of-Apps ✅
+- [x] Create bootstrap/app-of-apps/root-app.yaml
+- [x] Create bootstrap/app-of-apps/applicationset.yaml (sync waves)
 
 ---
 
-## Phase 4: Kyverno 1.16.x Policy Enforcement
+## Phase 3: Falco 0.41.x + Detection ✅
 
-### Task 4.1: Kyverno Installation
-- [ ] Create apps/kyverno/application.yaml
-- [ ] Create apps/kyverno/values.yaml
+### Task 3.1: Falco Installation ✅
+- [x] Create apps/falco/application.yaml
+- [x] Create apps/falco/values.yaml (modern-bpf driver with embedded rules)
 
-### Task 4.2: CEL-Based Policies
-- [ ] Create apps/kyverno/policies/validating/require-labels.yaml
-- [ ] Create apps/kyverno/policies/validating/require-resources.yaml
-- [ ] Create apps/kyverno/policies/image-validating/verify-signatures.yaml
-- [ ] Create apps/kyverno/policies/legacy/disallow-privileged.yaml
+### Task 3.2: Compliance-Tagged Rules ✅
+- [x] Embedded in values.yaml customRules section
+- [x] Rules include: Terminal Shell, Crypto Mining, Sensitive File Access
+- [x] Sovereignty rules include: Non-GitOps modifications, Privilege Escalation
 
 ---
 
-## Phase 5: Response Automation
+## Phase 4: Kyverno 1.16.x Policy Enforcement ✅
 
-### Task 5.1: Argo Events
-- [ ] Create apps/argo-events/application.yaml
-- [ ] Create apps/argo-events/event-sources/falco-webhook.yaml
-- [ ] Create apps/argo-events/eventbus.yaml
-- [ ] Create apps/argo-events/sensors/compliance-response.yaml
+### Task 4.1: Kyverno Installation ✅
+- [x] Create apps/kyverno/application.yaml
+- [x] Create apps/kyverno/values.yaml
 
-### Task 5.2: Falcosidekick
-- [ ] Create apps/falcosidekick/application.yaml
-- [ ] Create apps/falcosidekick/values.yaml
+### Task 4.2: CEL-Based Policies ✅
+- [x] Create apps/kyverno/policies/validating/require-labels.yaml
+- [x] Create apps/kyverno/policies/validating/require-resources.yaml
+- [x] Create apps/kyverno/policies/image-validating/verify-signatures.yaml
+- [x] Create apps/kyverno/policies/legacy/disallow-privileged.yaml
 
-### Task 5.3: Argo Workflows
-- [ ] Create apps/argo-workflows/application.yaml
-- [ ] Create apps/argo-workflows/templates/forensic-capture.yaml
-- [ ] Create apps/argo-workflows/templates/workload-isolation.yaml
-- [ ] Create apps/argo-workflows/templates/incident-create.yaml
-- [ ] Create apps/argo-workflows/templates/full-response.yaml
+---
+
+## Phase 5: Response Automation ✅
+
+### Task 5.1: Argo Events ✅
+- [x] Create apps/argo-events/application.yaml
+- [x] Create apps/argo-events/event-sources/falco-webhook.yaml
+- [x] Create apps/argo-events/eventbus.yaml
+- [x] Create apps/argo-events/sensors/compliance-response.yaml
+
+### Task 5.2: Falcosidekick ✅
+- [x] Create apps/falcosidekick/application.yaml
+- [x] Create apps/falcosidekick/values.yaml
+
+### Task 5.3: Argo Workflows ✅
+- [x] Create apps/argo-workflows/application.yaml
+- [x] Create apps/argo-workflows/templates/forensic-capture.yaml (includes capture, isolation, incident)
 
 ---
 
@@ -134,6 +133,6 @@ KubeCon EU 2026 OpenSovereign Day Demo
 
 ## Current Status
 
-**Phase:** 2 - ArgoCD 3.2.x Bootstrap
-**Next Task:** 2.1 - Create ArgoCD installation manifests
-**Completed:** Phase 1 (Python foundation, utilities, CLI, infrastructure)
+**Phase:** 6 - Demo Scenarios
+**Next Task:** 6.1 - Create shell access demo scenario
+**Completed:** Phases 1-5 (Python CLI, Infrastructure, ArgoCD, Falco, Kyverno, Response Automation)

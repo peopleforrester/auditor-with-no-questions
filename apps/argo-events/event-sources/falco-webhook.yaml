@@ -1,0 +1,19 @@
+# ABOUTME: Webhook EventSource for receiving Falco alerts via Falcosidekick
+# ABOUTME: Receives POST requests with Falco alert JSON
+
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: falco
+  namespace: argo-events
+spec:
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
+
+  webhook:
+    falco:
+      port: "12000"
+      endpoint: /falco
+      method: POST

@@ -1,0 +1,69 @@
+# ABOUTME: Falcosidekick Helm values for alert routing
+# ABOUTME: Configures webhook output to Argo Events for automated response
+
+# Replicas for HA
+replicaCount: 2
+
+# Configuration
+config:
+  # Debug output for demo visibility
+  debug: true
+
+  # Minimum priority to forward (info, notice, warning, error, critical)
+  customfields:
+    source: "sovereign-demo"
+    environment: "kubecon-2026"
+
+  # Webhook output to Argo Events
+  webhook:
+    address: "http://falco-eventsource-svc.argo-events.svc.cluster.local:12000/falco"
+    method: POST
+    customHeaders:
+      Content-Type: application/json
+    minimumpriority: warning
+
+  # Slack output for demo visibility (optional - configure webhook URL)
+  slack:
+    webhookurl: ""  # Set via --set or secret
+    channel: "#security-alerts"
+    username: "Falco"
+    icon: ":eagle:"
+    outputformat: "all"
+    minimumpriority: warning
+
+  # Stdout for debugging
+  stdout:
+    enabled: true
+    outputformat: json
+
+# Service for receiving from Falco
+service:
+  type: ClusterIP
+  port: 2801
+
+# Connect to Falco via gRPC
+# Falco sidekick will receive events from Falco's gRPC server
+listenaddress: "0.0.0.0"
+listenport: 2801
+
+# Web UI for viewing events
+webui:
+  enabled: true
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 2802
+
+# Resources
+resources:
+  requests:
+    cpu: 20m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Pod disruption budget for HA
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

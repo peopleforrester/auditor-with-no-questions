@@ -1,0 +1,23 @@
+# ABOUTME: ArgoCD command parameters ConfigMap for server settings
+# ABOUTME: Configures insecure mode for demo (use TLS in production)
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+  namespace: argocd
+data:
+  # Run in insecure mode for demo (no TLS termination at ArgoCD)
+  # In production, use proper TLS with ingress or load balancer
+  server.insecure: "true"
+
+  # Disable TLS on Redis for demo simplicity
+  redis.tls.enabled: "false"
+
+  # Application controller settings
+  controller.status.processors: "20"
+  controller.operation.processors: "10"
+  controller.self.heal.timeout.seconds: "5"
+
+  # Repo server settings for performance
+  reposerver.parallelism.limit: "0"

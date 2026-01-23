@@ -1,0 +1,38 @@
+# ABOUTME: Root ArgoCD Application that bootstraps all other applications
+# ABOUTME: Points to the apps/ directory using app-of-apps pattern
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    # Update this URL to your repository
+    repoURL: https://github.com/michaelrishiforrester/auditor-with-no-questions.git
+    targetRevision: main
+    path: bootstrap/app-of-apps
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

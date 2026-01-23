@@ -1,0 +1,62 @@
+# ABOUTME: Image verification policy for supply chain security
+# ABOUTME: Validates container images are from trusted registries
+
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-registry
+  annotations:
+    policies.kyverno.io/title: Verify Image Registry
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Ensures container images are only pulled from trusted registries.
+      This provides basic supply chain security for workloads.
+    compliance.sovereign-demo/frameworks: "NIS2,DORA,SOC2"
+    compliance.sovereign-demo/controls: "NIS2-21,DORA-II,SOC2-CC6.7"
+spec:
+  validationFailureAction: Audit  # Start with Audit for demo
+  background: true
+  rules:
+    - name: verify-trusted-registry
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaceSelector:
+                matchLabels:
+                  compliance.sovereign-demo/enforce: "true"
+      validate:
+        cel:
+          expressions:
+            - expression: >-
+                object.spec.containers.all(container,
+                  container.image.startsWith('docker.io/') ||
+                  container.image.startsWith('gcr.io/') ||
+                  container.image.startsWith('ghcr.io/') ||
+                  container.image.startsWith('quay.io/') ||
+                  container.image.startsWith('registry.k8s.io/') ||
+                  container.image.startsWith('public.ecr.aws/') ||
+                  !container.image.contains('/')
+                )
+              message: "Container images must be from trusted registries (docker.io, gcr.io, ghcr.io, quay.io, registry.k8s.io, public.ecr.aws)"
+
+    - name: deny-latest-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaceSelector:
+                matchLabels:
+                  compliance.sovereign-demo/enforce: "true"
+      validate:
+        cel:
+          expressions:
+            - expression: >-
+                object.spec.containers.all(container,
+                  !container.image.endsWith(':latest')
+                )
+              message: "Container images must not use the 'latest' tag. Use a specific version."

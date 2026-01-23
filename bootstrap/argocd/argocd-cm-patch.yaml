@@ -1,0 +1,77 @@
+# ABOUTME: ArgoCD ConfigMap patch for 3.x configuration
+# ABOUTME: Configures resource exclusions, health checks, and tracking method
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  # ArgoCD 3.x: Resource tracking method
+  # annotation+label provides best compatibility
+  application.resourceTrackingMethod: annotation+label
+
+  # Resource exclusions - ArgoCD 3.x has new defaults
+  # These high-churn resources are excluded to reduce noise
+  resource.exclusions: |
+    - apiGroups:
+        - cilium.io
+      kinds:
+        - CiliumIdentity
+      clusters:
+        - "*"
+    - apiGroups:
+        - ""
+      kinds:
+        - Endpoints
+      clusters:
+        - "*"
+
+  # Resource customizations for health checks
+  resource.customizations: |
+    # Kyverno policy reports health
+    wgpolicyk8s.io/PolicyReport:
+      health.lua: |
+        hs = {}
+        if obj.summary ~= nil then
+          if obj.summary.fail > 0 then
+            hs.status = "Degraded"
+            hs.message = "Policy violations detected"
+          else
+            hs.status = "Healthy"
+            hs.message = "All policies passing"
+          end
+        else
+          hs.status = "Progressing"
+          hs.message = "Waiting for policy evaluation"
+        end
+        return hs
+
+    # Argo Workflows health
+    argoproj.io/Workflow:
+      health.lua: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.phase == "Succeeded" then
+            hs.status = "Healthy"
+            hs.message = "Workflow completed successfully"
+          elseif obj.status.phase == "Failed" or obj.status.phase == "Error" then
+            hs.status = "Degraded"
+            hs.message = obj.status.message or "Workflow failed"
+          elseif obj.status.phase == "Running" then
+            hs.status = "Progressing"
+            hs.message = "Workflow in progress"
+          else
+            hs.status = "Unknown"
+            hs.message = obj.status.phase or "Unknown status"
+          end
+        else
+          hs.status = "Progressing"
+          hs.message = "Waiting for workflow to start"
+        end
+        return hs
+
+  # Repositories configuration (add your repo here)
+  # repositories: |
+  #   - url: https://github.com/your-org/your-repo
+  #     type: git
