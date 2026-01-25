@@ -1,6 +1,3 @@
-# Private planning documents (not tracked)
-docs/
-
 # Security - Never commit secrets or credentials
 .env
 .env.*
