@@ -1,0 +1,25 @@
+# ABOUTME: Kind cluster configuration for local E2E testing
+# ABOUTME: Configures a multi-node cluster suitable for testing ArgoCD and Falco
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: e2e-test
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # ArgoCD UI
+      - containerPort: 30080
+        hostPort: 30080
+        protocol: TCP
+      # Argo Events webhook
+      - containerPort: 31200
+        hostPort: 31200
+        protocol: TCP
+  - role: worker
+  - role: worker
