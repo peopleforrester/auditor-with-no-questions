@@ -41,7 +41,30 @@ def wait_for_deployment(
     while time.time() - start_time < timeout:
         try:
             deployment = apps_client.read_namespaced_deployment(name, namespace)
-            if deployment.status.ready_replicas == deployment.spec.replicas:
+            ready = deployment.status.ready_replicas or 0
+            desired = deployment.spec.replicas or 1
+            if ready >= desired:
+                return True
+        except client.ApiException:
+            pass
+        time.sleep(5)
+    return False
+
+
+def wait_for_statefulset(
+    apps_client: client.AppsV1Api,
+    name: str,
+    namespace: str,
+    timeout: int = 300,
+) -> bool:
+    """Wait for a statefulset to become ready."""
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            sts = apps_client.read_namespaced_stateful_set(name, namespace)
+            ready = sts.status.ready_replicas or 0
+            desired = sts.spec.replicas or 1
+            if ready >= desired:
                 return True
         except client.ApiException:
             pass

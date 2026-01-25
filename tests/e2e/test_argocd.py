@@ -6,7 +6,7 @@ import subprocess
 import pytest
 from kubernetes import client
 
-from .conftest import wait_for_deployment, wait_for_namespace
+from .conftest import wait_for_deployment, wait_for_namespace, wait_for_statefulset
 
 
 class TestArgoCDDeployment:
@@ -93,18 +93,19 @@ class TestArgoCDDeployment:
         if not argocd_installed:
             pytest.skip("ArgoCD not installed")
 
-        # In ArgoCD 3.x, the controller might be a StatefulSet
+        # In ArgoCD 3.x, the controller is a StatefulSet
+        # First try Deployment (older versions), then StatefulSet
         try:
             deployment = apps_client.read_namespaced_deployment(
                 "argocd-application-controller", "argocd"
             )
-            assert deployment.status.ready_replicas >= 1
+            ready = deployment.status.ready_replicas or 0
+            assert ready >= 1
         except client.ApiException:
-            # Try StatefulSet
-            sts = apps_client.read_namespaced_stateful_set(
-                "argocd-application-controller", "argocd"
-            )
-            assert sts.status.ready_replicas >= 1
+            # ArgoCD 3.x uses StatefulSet - wait for it to be ready
+            assert wait_for_statefulset(
+                apps_client, "argocd-application-controller", "argocd", timeout=120
+            ), "ArgoCD application controller StatefulSet not ready"
 
     @pytest.fixture(scope="class")
     def argocd_cleanup(
