@@ -110,3 +110,4 @@ tmp/
 temp/
 *.tmp
 *.bak
+staging.plan

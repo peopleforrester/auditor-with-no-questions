@@ -408,8 +408,9 @@ def check_kyverno_health() -> dict[str, Any]:
         from kubernetes import client
 
         apps_v1 = client.AppsV1Api()
+        # Kyverno 1.16+ uses kyverno-admission-controller as the main deployment
         deployment = apps_v1.read_namespaced_deployment(
-            name="kyverno",
+            name="kyverno-admission-controller",
             namespace="kyverno",
         )
 

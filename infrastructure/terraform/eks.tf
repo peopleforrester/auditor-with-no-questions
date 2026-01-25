@@ -32,11 +32,11 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  # Cluster encryption
+  # Cluster encryption - only configure when enabled
   cluster_encryption_config = var.enable_cluster_encryption ? {
     provider_key_arn = aws_kms_key.eks[0].arn
     resources        = ["secrets"]
-  } : {}
+  } : null
 
   # EKS Managed Node Group
   eks_managed_node_groups = {

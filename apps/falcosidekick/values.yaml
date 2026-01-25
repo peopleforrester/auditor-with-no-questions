@@ -9,17 +9,14 @@ config:
   # Debug output for demo visibility
   debug: true
 
-  # Minimum priority to forward (info, notice, warning, error, critical)
-  customfields:
-    source: "sovereign-demo"
-    environment: "kubecon-2026"
+  # Custom fields added to all events (avoid reserved label names like 'source')
+  customfields: "demo_source:sovereign-demo,demo_environment:kubecon-2026"
 
   # Webhook output to Argo Events
   webhook:
     address: "http://falco-eventsource-svc.argo-events.svc.cluster.local:12000/falco"
     method: POST
-    customHeaders:
-      Content-Type: application/json
+    customheaders: "Content-Type:application/json"
     minimumpriority: warning
 
   # Slack output for demo visibility (optional - configure webhook URL)

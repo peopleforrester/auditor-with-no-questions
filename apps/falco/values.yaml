@@ -30,8 +30,8 @@ falco:
   # Priority filter - capture warnings and above
   priority: warning
 
-  # Rules files
-  rules_file:
+  # Rules files (plural form required in Falco 0.42+)
+  rules_files:
     - /etc/falco/falco_rules.yaml
     - /etc/falco/falco_rules.local.yaml
     - /etc/falco/rules.d
