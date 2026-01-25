@@ -78,7 +78,7 @@ yarn-error.log*
 *.dylib
 vendor/
 
-# Terraform
+# OpenTofu / Terraform
 .terraform/
 *.tfstate
 *.tfstate.*

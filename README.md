@@ -3,13 +3,18 @@
 > *"The ability to move the needle without permission is a form of sovereignty."*
 > — Kelsey Hightower, Civo Navigate London 2025
 
+[![CI](https://github.com/michaelrishiforrester/auditor-with-no-questions/actions/workflows/ci.yaml/badge.svg)](https://github.com/michaelrishiforrester/auditor-with-no-questions/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![OpenTofu](https://img.shields.io/badge/OpenTofu-1.9+-blue?logo=opentofu)](https://opentofu.org/)
 [![CNCF Projects](https://img.shields.io/badge/CNCF-Graduated%20Projects-326CE5)](https://www.cncf.io/projects/)
 
 **Continuous compliance evidence for sovereign Kubernetes using CNCF projects.**
 
-Companion code for **Open Sovereign Cloud Day** at KubeCon EU 2026 Amsterdam.
+Companion code for **[Open Sovereign Cloud Day](https://events.linuxfoundation.org/kubecon-cloudnativecon-europe/)** at KubeCon EU 2026 Amsterdam.
+
+<!-- Demo GIF: Record 15-30 second clip showing shell-access → detection → evidence -->
+<!-- ![Demo](docs/demo.gif) -->
 
 ---
 
@@ -19,19 +24,23 @@ An auditor walks into your infrastructure. They expect scattered logs and engine
 
 This repository demonstrates a production architecture combining:
 
-| Component | Target | Current* | Role | CNCF Status |
-|-----------|--------|----------|------|-------------|
-| **EKS** | 1.34 | 1.34 | Kubernetes platform | N/A |
-| **ArgoCD** | 3.2.4 | 3.2.4 | GitOps audit trails | Graduated |
-| **Falco** | 0.42.0 | 0.42.0 | Runtime threat detection (eBPF) | Graduated |
-| **Falcosidekick** | 2.31.1 | 2.31.1 | Alert routing | Sandbox |
-| **Kyverno** | 1.16.2 | 1.16.2 | Policy enforcement (CEL-based) | Incubating |
-| **Argo Events** | 1.10.x | 1.9.10 | Event-driven automation | Incubating |
-| **Argo Workflows** | 3.6.16 | 3.6.0 | Response orchestration | Graduated |
-
-*\*Current = latest available in Helm charts. Will update when target versions are charted.*
+| Component | Version | Role | CNCF Status |
+|-----------|---------|------|-------------|
+| **EKS** | 1.33+ | Kubernetes platform | N/A |
+| **ArgoCD** | 3.2.4 | GitOps audit trails | Graduated |
+| **Falco** | 0.42.0 | Runtime threat detection (eBPF) | Graduated |
+| **Falcosidekick** | 2.32.0 | Alert routing | Sandbox |
+| **Kyverno** | 1.16.2 | Policy enforcement (CEL-based) | Incubating |
+| **Argo Events** | 1.9.10 | Event-driven automation | Incubating |
+| **Argo Workflows** | 3.6.0 | Response orchestration | Graduated |
 
 **No vendor lock-in. Runs anywhere Kubernetes runs.**
+
+## Infrastructure as Code
+
+This repo uses [OpenTofu](https://opentofu.org/), the open-source infrastructure-as-code tool under the Linux Foundation. This aligns with our commitment to avoiding vendor lock-in and using truly open-source tooling.
+
+**Terraform users:** OpenTofu is a drop-in replacement. If you prefer Terraform, replace `tofu` with `terraform` in all commands—the `.tf` files are fully compatible.
 
 ## Author
 
@@ -65,7 +74,7 @@ sovereign demo run shell-access
 
 ```bash
 # Setup
-sovereign setup --cluster-name demo --region eu-central-1 --method terraform
+sovereign setup --cluster-name demo --region eu-central-1 --method opentofu
 
 # Validation
 sovereign validate              # Check all components
@@ -93,6 +102,40 @@ sovereign evidence verify evidence.zip
 
 ## Architecture
 
+```mermaid
+flowchart TB
+    subgraph Detection ["Runtime Detection"]
+        Falco[Falco<br/>eBPF]
+        Falco -->|syscalls + k8s audit| Sidekick[Falcosidekick]
+    end
+
+    subgraph Response ["Automated Response"]
+        Sidekick -->|webhook| Events[Argo Events]
+        Events -->|trigger| Workflows[Argo Workflows]
+        Workflows -->|forensic capture<br/>isolate pod<br/>create ticket| Evidence[(Evidence<br/>Store)]
+    end
+
+    subgraph Policy ["Policy Enforcement"]
+        Kyverno[Kyverno<br/>CEL Policies]
+        Kyverno -.->|block non-compliant| Workloads[Workloads]
+    end
+
+    subgraph GitOps ["GitOps Audit Trail"]
+        Git[(Git)] --> ArgoCD[ArgoCD]
+        ArgoCD -->|deploy| Workloads
+        ArgoCD -->|drift detection| Evidence
+    end
+
+    Falco -->|monitor| Workloads
+
+    style Falco fill:#f96,stroke:#333
+    style Evidence fill:#9f9,stroke:#333
+    style Kyverno fill:#69f,stroke:#333
+```
+
+<details>
+<summary>ASCII Diagram (for terminals without Mermaid support)</summary>
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      SOVEREIGN COMPLIANCE LAYER                          │
@@ -118,6 +161,7 @@ sovereign evidence verify evidence.zip
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
+</details>
 
 ## Version Requirements (January 2026)
 
@@ -133,7 +177,17 @@ sovereign evidence verify evidence.zip
 
 ## Compliance Mappings
 
-Every Falco rule includes framework tags:
+Every Falco rule includes framework tags that map to specific regulatory controls:
+
+| Falco Rule | MITRE ATT&CK | NIS2 | DORA | SOC2 |
+|------------|--------------|------|------|------|
+| Terminal Shell in Container | T1059 (Command Execution) | Art. 21 - Access Control | Ch. III - Incident Detection | CC6.1 - Logical Access |
+| Sensitive File Access | T1552 (Credential Access) | Art. 21 - Access Control | Ch. II - Data Protection | CC6.1 - Logical Access |
+| Crypto Mining Activity | T1496 (Resource Hijacking) | Art. 21 - Threat Detection | Ch. III - Cyber Threat | CC7.2 - System Monitoring |
+| Privilege Escalation Attempt | T1548 (Privilege Escalation) | Art. 21 - Access Control | Ch. II - Security Control | CC6.1 - Logical Access |
+| Non-GitOps Modification | T1078 (Valid Accounts) | Art. 21 - Change Management | Ch. III - Change Control | CC8.1 - Change Management |
+
+### Tag Format in Rules
 
 ```yaml
 tags:
@@ -143,6 +197,8 @@ tags:
   - SOC2_CC6.1          # SOC2 Logical Access
 ```
 
+This enables filtering evidence exports by framework (e.g., `sovereign evidence export --framework NIS2`).
+
 ## Project Structure
 
 ```
@@ -151,7 +207,7 @@ tags:
 │   ├── validate.py           # Health checks
 │   ├── demo.py               # Demo orchestration
 │   └── evidence.py           # Evidence export
-├── infrastructure/           # Terraform + eksctl
+├── infrastructure/           # OpenTofu + eksctl
 ├── bootstrap/                # ArgoCD 3.2 installation
 ├── apps/                     # All managed applications
 │   ├── falco/                # Detection + rules

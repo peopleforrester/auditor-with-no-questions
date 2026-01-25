@@ -36,8 +36,8 @@ def main(ctx: click.Context) -> None:
 )
 @click.option(
     "--method",
-    type=click.Choice(["terraform", "eksctl"]),
-    default="terraform",
+    type=click.Choice(["opentofu", "eksctl"]),
+    default="opentofu",
     help="Infrastructure provisioning method",
 )
 @click.option(

@@ -20,7 +20,7 @@ KubeCon EU 2026 OpenSovereign Day Demo
 - [x] Create src/utils/aws.py (boto3/EKS helpers)
 - [x] Create src/utils/formatting.py (Rich output helpers)
 
-### Task 1.3: Terraform Infrastructure ✅
+### Task 1.3: OpenTofu Infrastructure ✅
 - [x] Create infrastructure/terraform/versions.tf
 - [x] Create infrastructure/terraform/variables.tf
 - [x] Create infrastructure/terraform/vpc.tf

@@ -24,6 +24,12 @@ falco:
   grpc_output:
     enabled: true
 
+  # HTTP output to Falcosidekick
+  http_output:
+    enabled: true
+    url: "http://falcosidekick.falco.svc.cluster.local:2801"
+    insecure: true
+
   # Log level
   log_level: info
 

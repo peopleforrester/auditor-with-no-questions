@@ -1,7 +1,8 @@
-# ABOUTME: Terraform version constraints and provider requirements
+# ABOUTME: OpenTofu version constraints and provider requirements
 # ABOUTME: Uses AWS provider 5.x and EKS module 20.x for EKS 1.32+
 
 terraform {
+  # OpenTofu 1.9+ compatible (also works with Terraform 1.6+)
   required_version = ">= 1.6.0"
 
   required_providers {
@@ -21,11 +22,11 @@ terraform {
 
   # Uncomment to use S3 backend for state
   # backend "s3" {
-  #   bucket         = "sovereign-demo-terraform-state"
+  #   bucket         = "sovereign-demo-opentofu-state"
   #   key            = "eks/terraform.tfstate"
   #   region         = "eu-central-1"
   #   encrypt        = true
-  #   dynamodb_table = "terraform-locks"
+  #   dynamodb_table = "opentofu-locks"
   # }
 }
 
@@ -36,7 +37,7 @@ provider "aws" {
     tags = {
       Project     = "sovereign-compliance-demo"
       Environment = var.environment
-      ManagedBy   = "terraform"
+      ManagedBy   = "opentofu"
     }
   }
 }

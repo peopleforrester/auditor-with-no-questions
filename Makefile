@@ -40,18 +40,18 @@ clean:  ## Clean up build artifacts
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
 
-# Terraform commands
-tf-init:  ## Initialize Terraform
-	terraform -chdir=infrastructure/terraform init
+# OpenTofu commands (drop-in replacement for Terraform)
+tf-init:  ## Initialize OpenTofu
+	tofu -chdir=infrastructure/terraform init
 
-tf-plan:  ## Plan Terraform changes
-	terraform -chdir=infrastructure/terraform plan
+tf-plan:  ## Plan OpenTofu changes
+	tofu -chdir=infrastructure/terraform plan
 
-tf-apply:  ## Apply Terraform changes
-	terraform -chdir=infrastructure/terraform apply
+tf-apply:  ## Apply OpenTofu changes
+	tofu -chdir=infrastructure/terraform apply
 
-tf-destroy:  ## Destroy Terraform resources
-	terraform -chdir=infrastructure/terraform destroy
+tf-destroy:  ## Destroy OpenTofu resources
+	tofu -chdir=infrastructure/terraform destroy
 
 # eksctl commands
 eksctl-create:  ## Create EKS cluster with eksctl

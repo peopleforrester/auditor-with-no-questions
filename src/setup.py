@@ -1,5 +1,5 @@
 # ABOUTME: Setup command implementation for cluster provisioning
-# ABOUTME: Handles EKS creation via Terraform/eksctl and ArgoCD bootstrap
+# ABOUTME: Handles EKS creation via OpenTofu/eksctl and ArgoCD bootstrap
 
 """Setup command implementation."""
 
@@ -58,7 +58,7 @@ def run_setup(
     Args:
         cluster_name: Name for the EKS cluster
         region: AWS region
-        method: Infrastructure method (terraform or eksctl)
+        method: Infrastructure method (opentofu or eksctl)
         skip_cluster: Skip cluster creation
     """
     from rich.console import Console
@@ -74,17 +74,17 @@ def run_setup(
         sys.exit(1)
 
     # Check for method-specific tools
-    if method == "terraform":
+    if method == "opentofu":
         try:
             subprocess.run(
-                ["terraform", "version"],
+                ["tofu", "version"],
                 capture_output=True,
                 check=True,
                 timeout=10,
             )
-            print_status("terraform", "installed", success=True)
+            print_status("opentofu", "installed", success=True)
         except (FileNotFoundError, subprocess.CalledProcessError):
-            print_error("Terraform not found. Install it or use --method eksctl")
+            print_error("OpenTofu not found. Install it or use --method eksctl")
             sys.exit(1)
     else:
         try:
@@ -96,7 +96,7 @@ def run_setup(
             )
             print_status("eksctl", "installed", success=True)
         except (FileNotFoundError, subprocess.CalledProcessError):
-            print_error("eksctl not found. Install it or use --method terraform")
+            print_error("eksctl not found. Install it or use --method opentofu")
             sys.exit(1)
 
     print_success("All prerequisites met")
@@ -107,25 +107,25 @@ def run_setup(
 
         project_root = Path(__file__).parent.parent
 
-        if method == "terraform":
+        if method == "opentofu":
             tf_dir = project_root / "infrastructure" / "terraform"
             if not tf_dir.exists():
-                print_error(f"Terraform directory not found: {tf_dir}")
+                print_error(f"OpenTofu directory not found: {tf_dir}")
                 sys.exit(1)
 
-            with create_progress("Initializing Terraform...") as (progress, task):
+            with create_progress("Initializing OpenTofu...") as (progress, task):
                 result = subprocess.run(
-                    ["terraform", "init"],
+                    ["tofu", "init"],
                     cwd=tf_dir,
                     capture_output=True,
                     text=True,
                 )
                 if result.returncode != 0:
-                    print_error(f"Terraform init failed: {result.stderr}")
+                    print_error(f"OpenTofu init failed: {result.stderr}")
                     sys.exit(1)
 
-            console.print("[yellow]Terraform plan would run here...[/yellow]")
-            console.print("[yellow]Terraform apply would run here...[/yellow]")
+            console.print("[yellow]OpenTofu plan would run here...[/yellow]")
+            console.print("[yellow]OpenTofu apply would run here...[/yellow]")
             console.print("[dim](Infrastructure creation not implemented - use existing cluster)[/dim]")
 
         else:

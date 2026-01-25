@@ -11,7 +11,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  TERRAFORM_VERSION: "1.7.0"
+  OPENTOFU_VERSION: "1.9.0"
 
 jobs:
   python-tests:
@@ -151,8 +151,8 @@ jobs:
             --version 0.45.0 \
             > /dev/null
 
-  terraform-validation:
-    name: Terraform Validation
+  opentofu-validation:
+    name: OpenTofu Validation
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -160,16 +160,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
         with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          tofu_version: ${{ env.OPENTOFU_VERSION }}
 
-      - name: Terraform init
-        run: terraform init -backend=false
+      - name: OpenTofu init
+        run: tofu init -backend=false
 
-      - name: Terraform validate
-        run: terraform validate
+      - name: OpenTofu validate
+        run: tofu validate
 
       - name: Install tflint
         run: |
@@ -178,8 +178,8 @@ jobs:
       - name: Run tflint
         run: tflint --init && tflint
 
-  terraform-security:
-    name: Terraform Security Scan
+  opentofu-security:
+    name: OpenTofu Security Scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

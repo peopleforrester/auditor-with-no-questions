@@ -31,6 +31,7 @@ spec:
               namespaces:
                 - kube-system
                 - falco  # Falco needs privileged for eBPF
+                - argo-events  # Argo Events controllers need higher privileges
       validate:
         message: "Privileged containers are not allowed. Set securityContext.privileged to false."
         pattern:
@@ -56,6 +57,8 @@ spec:
           - resources:
               namespaces:
                 - kube-system
+                - falco  # Falco needs privilege escalation for eBPF
+                - argo-events  # Argo Events controllers need higher privileges
       validate:
         message: "Privilege escalation is not allowed. Set securityContext.allowPrivilegeEscalation to false."
         pattern:
