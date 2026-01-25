@@ -115,14 +115,14 @@
 ## Architecture Deep Dive (5 minutes)
 
 ### Key Points
-- ArgoCD 3.2.x with new RBAC model
-- Falco 0.41.x with modern eBPF driver
-- Kyverno 1.16.x with CEL-based policies
-- Argo Events + Workflows for automation
+- ArgoCD 3.2.4 with new RBAC model
+- Falco 0.42.0 with modern eBPF driver
+- Kyverno 1.16.2 with CEL-based policies
+- Argo Events 1.10.x + Argo Workflows 3.6.16 for automation
 
 ### Why These Versions Matter
 - ArgoCD 3.x: Breaking changes in RBAC, new ApplicationSet features
-- Falco 0.41: Modern eBPF replaces kernel module
+- Falco 0.42: Modern eBPF replaces kernel module, improved container engine support
 - Kyverno 1.16: CEL policies are more performant
 
 ### Quote

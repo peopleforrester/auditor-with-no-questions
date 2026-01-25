@@ -1,5 +1,5 @@
 # ABOUTME: eksctl cluster configuration (alternative to Terraform)
-# ABOUTME: Creates EKS 1.32 cluster with managed node group in eu-central-1
+# ABOUTME: Creates EKS 1.34 cluster with managed node group in eu-central-1
 
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
@@ -7,7 +7,7 @@ kind: ClusterConfig
 metadata:
   name: sovereign-demo
   region: eu-central-1
-  version: "1.32"
+  version: "1.34"
   tags:
     Project: sovereign-compliance-demo
     Environment: demo
@@ -54,7 +54,7 @@ managedNodeGroups:
     maxSize: 5
     volumeSize: 50
     volumeType: gp3
-    amiFamily: AmazonLinux2023  # AL2023 for EKS 1.32+
+    amiFamily: AmazonLinux2023  # AL2023 for EKS 1.34+
     labels:
       role: demo
     tags:

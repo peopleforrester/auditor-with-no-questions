@@ -1,4 +1,4 @@
-# ABOUTME: Falco Helm values for 0.41.x with modern-bpf driver
+# ABOUTME: Falco Helm values for 0.42.0 with modern-bpf driver
 # ABOUTME: Configures JSON output and falcosidekick integration
 
 # Use modern-bpf driver (CO-RE) - requires kernel 5.8+ with BTF

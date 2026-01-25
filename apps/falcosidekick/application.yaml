@@ -16,7 +16,7 @@ spec:
   source:
     repoURL: https://falcosecurity.github.io/charts
     chart: falcosidekick
-    targetRevision: 0.7.0
+    targetRevision: 0.8.10  # Falcosidekick 2.31.1
     helm:
       releaseName: falcosidekick
       valueFiles:

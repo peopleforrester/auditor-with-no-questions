@@ -55,7 +55,7 @@ KubeCon EU 2026 OpenSovereign Day Demo
 
 ---
 
-## Phase 3: Falco 0.41.x + Detection ✅
+## Phase 3: Falco 0.42.0 + Detection ✅
 
 ### Task 3.1: Falco Installation ✅
 - [x] Create apps/falco/application.yaml
