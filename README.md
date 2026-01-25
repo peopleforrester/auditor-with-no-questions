@@ -19,13 +19,17 @@ An auditor walks into your infrastructure. They expect scattered logs and engine
 
 This repository demonstrates a production architecture combining:
 
-| Component | Version | Role | CNCF Status |
-|-----------|---------|------|-------------|
-| **ArgoCD** | 3.2.x | GitOps audit trails | Graduated |
-| **Falco** | 0.41.x | Runtime threat detection (eBPF) | Graduated |
-| **Kyverno** | 1.16.x | Policy enforcement (CEL-based) | Incubating |
-| **Argo Events** | 1.10.x | Event-driven automation | Incubating |
-| **Argo Workflows** | 3.6.x | Response orchestration | Graduated |
+| Component | Target | Current* | Role | CNCF Status |
+|-----------|--------|----------|------|-------------|
+| **EKS** | 1.34 | 1.34 | Kubernetes platform | N/A |
+| **ArgoCD** | 3.2.4 | 3.2.4 | GitOps audit trails | Graduated |
+| **Falco** | 0.42.0 | 0.42.0 | Runtime threat detection (eBPF) | Graduated |
+| **Falcosidekick** | 2.31.1 | 2.31.1 | Alert routing | Sandbox |
+| **Kyverno** | 1.16.2 | 1.16.2 | Policy enforcement (CEL-based) | Incubating |
+| **Argo Events** | 1.10.x | 1.9.10 | Event-driven automation | Incubating |
+| **Argo Workflows** | 3.6.16 | 3.6.0 | Response orchestration | Graduated |
+
+*\*Current = latest available in Helm charts. Will update when target versions are charted.*
 
 **No vendor lock-in. Runs anywhere Kubernetes runs.**
 
@@ -117,12 +121,15 @@ sovereign evidence verify evidence.zip
 
 ## Version Requirements (January 2026)
 
-**Important version updates:**
+**Target versions for KubeCon EU 2026 (March 23):**
 
-- **EKS**: Use 1.32+ (1.29 is now extended support)
-- **ArgoCD**: 3.2.x (breaking changes from 2.x - new RBAC model)
-- **Falco**: 0.41.x with `modern-bpf` driver
-- **Kyverno**: 1.16.x with new CEL-based ValidatingPolicy
+- **EKS**: 1.34 (standard support until Dec 2026)
+- **ArgoCD**: 3.2.4 (breaking changes from 2.x - new RBAC model)
+- **Falco**: 0.42.0 with `modern-bpf` driver (CO-RE, kernel 5.8+)
+- **Falcosidekick**: 2.31.1 (OTel support)
+- **Kyverno**: 1.16.2 with new CEL-based ValidatingPolicy
+- **Argo Events**: 1.10.x (currently using 1.9.10 until charted)
+- **Argo Workflows**: 3.6.16 (currently using 3.6.0 until charted)
 
 ## Compliance Mappings
 

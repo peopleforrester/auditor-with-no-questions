@@ -16,7 +16,7 @@ spec:
   source:
     repoURL: https://argoproj.github.io/argo-helm
     chart: argo-events
-    targetRevision: 2.4.20  # Argo Events 1.9.10 (latest available)
+    targetRevision: 2.4.20  # Argo Events 1.9.10 (target: 1.10.x when charted)
     helm:
       releaseName: argo-events
       values: |
