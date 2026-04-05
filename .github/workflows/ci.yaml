@@ -111,34 +111,34 @@ jobs:
       - name: Validate Falco chart
         run: |
           helm template falco falcosecurity/falco \
-            --version 7.0.0 \
+            --version 8.0.1 \
             -f apps/falco/values.yaml \
             > /dev/null
 
       - name: Validate Falcosidekick chart
         run: |
           helm template falcosidekick falcosecurity/falcosidekick \
-            --version 0.12.0 \
+            --version 0.13.1 \
             -f apps/falcosidekick/values.yaml \
             > /dev/null
 
       - name: Validate Kyverno chart
         run: |
           helm template kyverno kyverno/kyverno \
-            --version 3.6.2 \
+            --version 3.7.1 \
             -f apps/kyverno/values.yaml \
             > /dev/null
 
       - name: Validate Argo Events chart
         run: |
           helm template argo-events argo/argo-events \
-            --version 2.4.20 \
+            --version 2.4.21 \
             > /dev/null
 
       - name: Validate Argo Workflows chart
         run: |
           helm template argo-workflows argo/argo-workflows \
-            --version 0.45.0 \
+            --version 1.0.7 \
             > /dev/null
 
   opentofu-validation:

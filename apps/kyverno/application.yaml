@@ -1,4 +1,4 @@
-# ABOUTME: ArgoCD Application for Kyverno 1.16.x deployment
+# ABOUTME: ArgoCD Application for Kyverno 1.17.x deployment
 # ABOUTME: Policy enforcement with CEL-based ValidatingPolicy support
 
 apiVersion: argoproj.io/v1alpha1
@@ -16,7 +16,7 @@ spec:
   source:
     repoURL: https://kyverno.github.io/kyverno
     chart: kyverno
-    targetRevision: 3.6.2  # Kyverno 1.16.2
+    targetRevision: 3.7.1  # Kyverno 1.17.1
     helm:
       releaseName: kyverno
       valueFiles:

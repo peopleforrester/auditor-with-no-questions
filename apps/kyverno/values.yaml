@@ -1,4 +1,4 @@
-# ABOUTME: Kyverno Helm values for 1.16.x with policy reporting
+# ABOUTME: Kyverno Helm values for 1.17.x with policy reporting
 # ABOUTME: Enables background scanning and admission controller
 
 # Admission controller settings

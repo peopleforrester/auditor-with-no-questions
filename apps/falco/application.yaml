@@ -1,4 +1,4 @@
-# ABOUTME: ArgoCD Application for Falco 0.42.0 deployment
+# ABOUTME: ArgoCD Application for Falco 0.43.0 deployment
 # ABOUTME: Uses Helm chart with modern-bpf driver configuration
 
 apiVersion: argoproj.io/v1alpha1
@@ -16,7 +16,7 @@ spec:
   source:
     repoURL: https://falcosecurity.github.io/charts
     chart: falco
-    targetRevision: 7.0.0  # Falco 0.42.0
+    targetRevision: 8.0.1  # Falco 0.43.0
     helm:
       releaseName: falco
       valueFiles:
