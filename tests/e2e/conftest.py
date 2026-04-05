@@ -9,6 +9,25 @@ import pytest
 from kubernetes import client, config
 
 
+def _cluster_available() -> bool:
+    """Check if a Kubernetes cluster is reachable."""
+    try:
+        config.load_kube_config()
+        v1 = client.CoreV1Api()
+        v1.list_namespace(limit=1)
+        return True
+    except Exception:
+        return False
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    """Skip all E2E tests when no Kubernetes cluster is available."""
+    if not _cluster_available():
+        skip_marker = pytest.mark.skip(reason="No Kubernetes cluster available")
+        for item in items:
+            item.add_marker(skip_marker)
+
+
 @pytest.fixture(scope="session")
 def k8s_client() -> Generator[client.CoreV1Api, None, None]:
     """Load kubeconfig and return Kubernetes API client."""

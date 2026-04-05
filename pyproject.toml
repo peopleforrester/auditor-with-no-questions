@@ -50,6 +50,7 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=6.0.0",
     "pytest-timeout>=2.3.0",
     "ruff>=0.2.0",
     "mypy>=1.8.0",
@@ -105,3 +106,12 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+addopts = "--ignore=tests/e2e"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/demo.py", "src/setup.py"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 30
