@@ -7,8 +7,8 @@ Complete deployment walkthrough for the sovereign compliance demo environment.
 - **AWS Account** with permissions to create EKS clusters, VPCs, and IAM roles
 - **AWS CLI** configured with credentials (`aws configure`)
 - **kubectl** v1.28+
-- **Helm** v3.14+
-- **OpenTofu** v1.9+ (or Terraform v1.6+ as drop-in replacement)
+- **Helm** v4.1+
+- **OpenTofu** v1.11+ (or Terraform v1.6+ as drop-in replacement)
 
 ### Install OpenTofu
 

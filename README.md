@@ -6,7 +6,7 @@
 [![CI](https://github.com/peopleforrester/auditor-with-no-questions/actions/workflows/ci.yaml/badge.svg)](https://github.com/peopleforrester/auditor-with-no-questions/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![OpenTofu](https://img.shields.io/badge/OpenTofu-1.9+-blue?logo=opentofu)](https://opentofu.org/)
+[![OpenTofu](https://img.shields.io/badge/OpenTofu-1.11+-blue?logo=opentofu)](https://opentofu.org/)
 [![CNCF Projects](https://img.shields.io/badge/CNCF-Graduated%20Projects-326CE5)](https://www.cncf.io/projects/)
 
 **Continuous compliance evidence for sovereign Kubernetes using CNCF projects.**
@@ -27,12 +27,12 @@ This repository demonstrates a production architecture combining:
 | Component | Version | Role | CNCF Status |
 |-----------|---------|------|-------------|
 | **EKS** | 1.33+ | Kubernetes platform | N/A |
-| **ArgoCD** | 3.2.4 | GitOps audit trails | Graduated |
-| **Falco** | 0.42.0 | Runtime threat detection (eBPF) | Graduated |
+| **ArgoCD** | 3.3.6 | GitOps audit trails | Graduated |
+| **Falco** | 0.43.0 | Runtime threat detection (eBPF) | Graduated |
 | **Falcosidekick** | 2.32.0 | Alert routing | Sandbox |
-| **Kyverno** | 1.16.2 | Policy enforcement (CEL-based) | Incubating |
+| **Kyverno** | 1.17.1 | Policy enforcement (CEL-based) | Incubating |
 | **Argo Events** | 1.9.10 | Event-driven automation | Incubating |
-| **Argo Workflows** | 3.6.0 | Response orchestration | Graduated |
+| **Argo Workflows** | 4.0.3 | Response orchestration | Graduated |
 
 **No vendor lock-in. Runs anywhere Kubernetes runs.**
 
@@ -163,17 +163,18 @@ flowchart TB
 ```
 </details>
 
-## Version Requirements (January 2026)
+## Version Requirements (April 2026)
 
-**Target versions for KubeCon EU 2026 (March 23):**
+**Target versions for KubeCon EU 2026 Amsterdam:**
 
-- **EKS**: 1.34 (standard support until Dec 2026)
-- **ArgoCD**: 3.2.4 (breaking changes from 2.x - new RBAC model)
-- **Falco**: 0.42.0 with `modern-bpf` driver (CO-RE, kernel 5.8+)
-- **Falcosidekick**: 2.31.1 (OTel support)
-- **Kyverno**: 1.16.2 with new CEL-based ValidatingPolicy
-- **Argo Events**: 1.10.x (currently using 1.9.10 until charted)
-- **Argo Workflows**: 3.6.16 (currently using 3.6.0 until charted)
+- **EKS**: 1.33+ (standard support)
+- **ArgoCD**: 3.3.6 (latest stable, new RBAC model from 3.x)
+- **Falco**: 0.43.0 with `modern-bpf` driver (CO-RE, kernel 5.8+)
+- **Falcosidekick**: 2.32.0 (OTel support)
+- **Kyverno**: 1.17.1 with CEL-based ValidatingPolicy
+- **Argo Events**: 1.9.10
+- **Argo Workflows**: 4.0.3
+- **OpenTofu**: 1.11.5
 
 ## Compliance Mappings
 
