@@ -145,14 +145,12 @@ def update_kubeconfig(cluster_name: str, region: str | None = None) -> None:
     ]
 
     try:
-        result = subprocess.run(
+        subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             check=True,
         )
-        if result.returncode != 0:
-            raise RuntimeError(f"Failed to update kubeconfig: {result.stderr}")
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to update kubeconfig: {e.stderr}") from e
     except FileNotFoundError as e:

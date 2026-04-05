@@ -8,7 +8,7 @@ import json
 import subprocess
 import zipfile
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -23,14 +23,9 @@ def get_kubernetes_client() -> Any:
     Returns:
         CoreV1Api client instance
     """
-    from kubernetes import client, config
+    from src.utils.kubernetes import get_client
 
-    try:
-        config.load_incluster_config()
-    except config.ConfigException:
-        config.load_kube_config()
-
-    return client.CoreV1Api()
+    return get_client()
 
 
 @dataclass
@@ -58,14 +53,14 @@ def get_falco_alerts(days: int) -> list[dict[str, Any]]:
     # For demo, return sample data
     return [
         {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "rule": "Terminal Shell in Container",
             "priority": "WARNING",
             "output": "Shell spawned in container (user=root container=demo-app)",
             "tags": ["container", "shell", "mitre_execution", "T1059", "NIS2_access_control"],
         },
         {
-            "timestamp": (datetime.utcnow() - timedelta(hours=2)).isoformat(),
+            "timestamp": (datetime.now(UTC) - timedelta(hours=2)).isoformat(),
             "rule": "Non-GitOps Kubectl Operation",
             "priority": "ERROR",
             "output": "kubectl apply detected outside ArgoCD",
@@ -86,14 +81,14 @@ def get_argocd_sync_history(days: int) -> list[dict[str, Any]]:
     # In real implementation, would query ArgoCD API
     return [
         {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "application": "demo-app",
             "revision": "abc123",
             "status": "Synced",
             "message": "successfully synced",
         },
         {
-            "timestamp": (datetime.utcnow() - timedelta(days=1)).isoformat(),
+            "timestamp": (datetime.now(UTC) - timedelta(days=1)).isoformat(),
             "application": "falco",
             "revision": "def456",
             "status": "Synced",
@@ -138,7 +133,7 @@ def get_git_history(days: int) -> list[dict[str, Any]]:
     """
 
     try:
-        since_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+        since_date = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
         result = subprocess.run(
             [
                 "git",
@@ -192,7 +187,7 @@ def export_evidence(days: int, output_path: str) -> None:
     """
     console = Console()
 
-    end_date = datetime.utcnow()
+    end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)
 
     console.print(
@@ -237,7 +232,7 @@ def export_evidence(days: int, output_path: str) -> None:
 
         # Create manifest
         manifest = EvidenceManifest(
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
             days_covered=days,
             start_date=start_date.isoformat(),
             end_date=end_date.isoformat(),
@@ -421,7 +416,7 @@ def generate_manifest(evidence_data: dict[str, list]) -> dict[str, Any]:
     }
 
     return {
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "evidence_files": [
             "falco/alerts.json",
             "argocd/sync-history.json",

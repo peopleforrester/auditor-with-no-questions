@@ -20,14 +20,9 @@ def get_kubernetes_client() -> Any:
     Returns:
         CoreV1Api client instance
     """
-    from kubernetes import client, config
+    from src.utils.kubernetes import get_client
 
-    try:
-        config.load_incluster_config()
-    except config.ConfigException:
-        config.load_kube_config()
-
-    return client.CoreV1Api()
+    return get_client()
 
 
 @dataclass
