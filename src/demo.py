@@ -145,14 +145,16 @@ def run_shell_access_scenario(console: Console, wait: bool) -> None:
             console.print("[dim]Target pod already exists[/dim]")
         else:
             console.print("[yellow]Target pod not found - would deploy here[/yellow]")
-            console.print("[dim](Deployment not implemented - create demo/target-app manually)[/dim]")
+            console.print(
+                "[dim](Deployment not implemented - create demo/target-app manually)[/dim]"
+            )
             return
     except Exception as e:
         print_error(f"Failed to check pods: {e}")
         return
 
     console.print("\n[bold]Step 2:[/bold] Executing shell in container...")
-    console.print("[cyan]kubectl exec -it demo-target -- /bin/sh -c \"echo audit-test\"[/cyan]")
+    console.print('[cyan]kubectl exec -it demo-target -- /bin/sh -c "echo audit-test"[/cyan]')
 
     try:
         from src.utils.kubernetes import exec_in_pod
@@ -197,7 +199,9 @@ def run_drift_detection_scenario(console: Console, wait: bool) -> None:
         wait: Wait for ArgoCD detection
     """
     console.print("[bold]Step 1:[/bold] Applying out-of-band change...")
-    console.print("[cyan]kubectl apply -f demo/scenarios/02-drift-detection/drift-manifest.yaml[/cyan]")
+    console.print(
+        "[cyan]kubectl apply -f demo/scenarios/02-drift-detection/drift-manifest.yaml[/cyan]"
+    )
     console.print("[yellow](Would apply manifest here)[/yellow]")
 
     if wait:

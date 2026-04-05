@@ -148,13 +148,12 @@ class TestValidateModule(unittest.TestCase):
     def test_check_handles_api_exception(self, mock_get_client):
         """Test health checks handle API exceptions gracefully."""
         from kubernetes.client.exceptions import ApiException
+
         from src.validate import check_argocd_health
 
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
-        mock_client.list_namespaced_pod.side_effect = ApiException(
-            status=404, reason="Not Found"
-        )
+        mock_client.list_namespaced_pod.side_effect = ApiException(status=404, reason="Not Found")
 
         result = check_argocd_health()
 

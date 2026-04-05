@@ -139,7 +139,7 @@
 4. The best audit is a boring audit
 
 ### Call to Action
-- Repo is public: github.com/michaelrishiforrester/auditor-with-no-questions
+- Repo is public: github.com/peopleforrester/auditor-with-no-questions
 - Everything demoed is production-ready
 - Questions welcome
 

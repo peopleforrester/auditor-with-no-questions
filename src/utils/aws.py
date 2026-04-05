@@ -114,7 +114,8 @@ def list_eks_clusters(region: str | None = None) -> list[str]:
 
     try:
         response = eks.list_clusters()
-        return response.get("clusters", [])
+        clusters: list[str] = response.get("clusters", [])
+        return clusters
     except (ClientError, NoCredentialsError) as e:
         raise RuntimeError(f"Failed to list EKS clusters: {e}") from e
 
@@ -134,20 +135,22 @@ def update_kubeconfig(cluster_name: str, region: str | None = None) -> None:
     region = region or get_current_region()
 
     cmd = [
-        "aws", "eks", "update-kubeconfig",
-        "--name", cluster_name,
-        "--region", region,
+        "aws",
+        "eks",
+        "update-kubeconfig",
+        "--name",
+        cluster_name,
+        "--region",
+        region,
     ]
 
     try:
-        result = subprocess.run(
+        subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             check=True,
         )
-        if result.returncode != 0:
-            raise RuntimeError(f"Failed to update kubeconfig: {result.stderr}")
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to update kubeconfig: {e.stderr}") from e
     except FileNotFoundError as e:

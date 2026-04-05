@@ -111,9 +111,7 @@ def list_pods(
             "status": pod.status.phase,
             "node": pod.spec.node_name,
             "containers": [c.name for c in pod.spec.containers],
-            "ready": all(
-                cs.ready for cs in (pod.status.container_statuses or [])
-            ),
+            "ready": all(cs.ready for cs in (pod.status.container_statuses or [])),
         }
         for pod in pods.items
     ]
@@ -246,7 +244,7 @@ def exec_in_pod(
     if container:
         kwargs["container"] = container
 
-    result = stream(v1.connect_get_namespaced_pod_exec, **kwargs)
+    result: str = stream(v1.connect_get_namespaced_pod_exec, **kwargs)
     return result
 
 
