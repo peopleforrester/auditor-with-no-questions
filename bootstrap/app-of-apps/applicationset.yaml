@@ -68,7 +68,7 @@ spec:
       project: default
 
       source:
-        repoURL: https://github.com/michaelrishiforrester/auditor-with-no-questions.git
+        repoURL: https://github.com/peopleforrester/auditor-with-no-questions.git
         targetRevision: main
         path: "{{path}}"
 

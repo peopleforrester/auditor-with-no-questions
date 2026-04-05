@@ -3,7 +3,7 @@
 > *"The ability to move the needle without permission is a form of sovereignty."*
 > — Kelsey Hightower, Civo Navigate London 2025
 
-[![CI](https://github.com/michaelrishiforrester/auditor-with-no-questions/actions/workflows/ci.yaml/badge.svg)](https://github.com/michaelrishiforrester/auditor-with-no-questions/actions/workflows/ci.yaml)
+[![CI](https://github.com/peopleforrester/auditor-with-no-questions/actions/workflows/ci.yaml/badge.svg)](https://github.com/peopleforrester/auditor-with-no-questions/actions/workflows/ci.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![OpenTofu](https://img.shields.io/badge/OpenTofu-1.9+-blue?logo=opentofu)](https://opentofu.org/)
@@ -51,7 +51,7 @@ Principal Training Architect & DevOps Advocate
 
 ```bash
 # Clone and install
-git clone https://github.com/michaelrishiforrester/auditor-with-no-questions.git
+git clone https://github.com/peopleforrester/auditor-with-no-questions.git
 cd auditor-with-no-questions
 
 # Python environment (requires 3.11+)

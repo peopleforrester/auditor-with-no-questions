@@ -67,9 +67,9 @@ e2e = [
 sovereign = "src.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/michaelrishiforrester/auditor-with-no-questions"
-Repository = "https://github.com/michaelrishiforrester/auditor-with-no-questions"
-Issues = "https://github.com/michaelrishiforrester/auditor-with-no-questions/issues"
+Homepage = "https://github.com/peopleforrester/auditor-with-no-questions"
+Repository = "https://github.com/peopleforrester/auditor-with-no-questions"
+Issues = "https://github.com/peopleforrester/auditor-with-no-questions/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
