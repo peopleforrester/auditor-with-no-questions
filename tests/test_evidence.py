@@ -1,7 +1,6 @@
 # ABOUTME: Tests for the evidence export module
 # ABOUTME: Verifies evidence package generation and verification
 
-import json
 import os
 import tempfile
 import unittest
@@ -10,8 +9,8 @@ from unittest.mock import MagicMock, patch
 
 from src.evidence import (
     create_evidence_package,
-    verify_evidence_package,
     generate_manifest,
+    verify_evidence_package,
 )
 
 

@@ -3,12 +3,13 @@
 
 """Rich output helpers for terminal formatting."""
 
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.progress import Progress, SpinnerColumn, TaskID, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
 console = Console()
@@ -117,7 +118,7 @@ def print_panel(
 @contextmanager
 def create_progress(
     description: str = "Working...",
-) -> Generator[tuple[Progress, int], None, None]:
+) -> Generator[tuple[Progress, TaskID], None, None]:
     """Create a progress context with spinner.
 
     Args:

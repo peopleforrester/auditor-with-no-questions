@@ -14,7 +14,7 @@ from rich.table import Table
 from src.utils import print_error, print_success
 
 
-def get_kubernetes_client():
+def get_kubernetes_client() -> Any:
     """Get Kubernetes API client.
 
     Returns:

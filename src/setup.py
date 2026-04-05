@@ -103,7 +103,9 @@ def run_setup(
 
     # Step 2: Create cluster (unless skipped)
     if not skip_cluster:
-        console.print(f"\n[bold]Step 2: Creating EKS cluster '{cluster_name}' in {region}...[/bold]")
+        console.print(
+            f"\n[bold]Step 2: Creating EKS cluster '{cluster_name}' in {region}...[/bold]"
+        )
 
         project_root = Path(__file__).parent.parent
 
@@ -126,7 +128,9 @@ def run_setup(
 
             console.print("[yellow]OpenTofu plan would run here...[/yellow]")
             console.print("[yellow]OpenTofu apply would run here...[/yellow]")
-            console.print("[dim](Infrastructure creation not implemented - use existing cluster)[/dim]")
+            console.print(
+                "[dim](Infrastructure creation not implemented - use existing cluster)[/dim]"
+            )
 
         else:
             eksctl_file = project_root / "infrastructure" / "eksctl" / "cluster.yaml"
@@ -135,7 +139,9 @@ def run_setup(
                 sys.exit(1)
 
             console.print("[yellow]eksctl create cluster would run here...[/yellow]")
-            console.print("[dim](Infrastructure creation not implemented - use existing cluster)[/dim]")
+            console.print(
+                "[dim](Infrastructure creation not implemented - use existing cluster)[/dim]"
+            )
     else:
         console.print("\n[bold]Step 2: Skipping cluster creation (--skip-cluster)[/bold]")
 

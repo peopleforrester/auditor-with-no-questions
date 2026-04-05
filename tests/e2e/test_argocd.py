@@ -13,9 +13,7 @@ class TestArgoCDDeployment:
     """Test ArgoCD deployment in Kind cluster."""
 
     @pytest.fixture(scope="class")
-    def argocd_installed(
-        self, k8s_client: client.CoreV1Api, apps_client: client.AppsV1Api
-    ) -> bool:
+    def argocd_installed(self, k8s_client: client.CoreV1Api, apps_client: client.AppsV1Api) -> bool:
         """Install ArgoCD in the cluster."""
         # Apply ArgoCD namespace
         subprocess.run(
@@ -46,9 +44,7 @@ class TestArgoCDDeployment:
         assert wait_for_namespace(k8s_client, "argocd", timeout=30)
 
         # Wait for ArgoCD server deployment
-        ready = wait_for_deployment(
-            apps_client, "argocd-server", "argocd", timeout=300
-        )
+        ready = wait_for_deployment(apps_client, "argocd-server", "argocd", timeout=300)
 
         return ready
 
@@ -69,9 +65,7 @@ class TestArgoCDDeployment:
         if not argocd_installed:
             pytest.skip("ArgoCD not installed")
 
-        deployment = apps_client.read_namespaced_deployment(
-            "argocd-server", "argocd"
-        )
+        deployment = apps_client.read_namespaced_deployment("argocd-server", "argocd")
         assert deployment.status.ready_replicas >= 1
 
     def test_argocd_repo_server_running(
@@ -81,9 +75,7 @@ class TestArgoCDDeployment:
         if not argocd_installed:
             pytest.skip("ArgoCD not installed")
 
-        deployment = apps_client.read_namespaced_deployment(
-            "argocd-repo-server", "argocd"
-        )
+        deployment = apps_client.read_namespaced_deployment("argocd-repo-server", "argocd")
         assert deployment.status.ready_replicas >= 1
 
     def test_argocd_application_controller_running(
@@ -108,9 +100,7 @@ class TestArgoCDDeployment:
             ), "ArgoCD application controller StatefulSet not ready"
 
     @pytest.fixture(scope="class")
-    def argocd_cleanup(
-        self, k8s_client: client.CoreV1Api, argocd_installed: bool
-    ) -> None:
+    def argocd_cleanup(self, k8s_client: client.CoreV1Api, argocd_installed: bool) -> None:
         """Cleanup ArgoCD after tests."""
         yield
         # Don't delete in CI to allow inspection on failure

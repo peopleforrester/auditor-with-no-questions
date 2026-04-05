@@ -138,9 +138,7 @@ class TestArgoEventsDeployment:
         )
         assert deployment.status.ready_replicas >= 1
 
-    def test_argo_events_crds_installed(
-        self, argo_events_installed: bool
-    ) -> None:
+    def test_argo_events_crds_installed(self, argo_events_installed: bool) -> None:
         """Verify Argo Events CRDs are installed."""
         if not argo_events_installed:
             pytest.skip("Argo Events not installed")
@@ -209,9 +207,7 @@ class TestArgoWorkflowsDeployment:
         )
         assert deployment.status.ready_replicas >= 1
 
-    def test_argo_workflows_crds_installed(
-        self, argo_workflows_installed: bool
-    ) -> None:
+    def test_argo_workflows_crds_installed(self, argo_workflows_installed: bool) -> None:
         """Verify Argo Workflows CRDs are installed."""
         if not argo_workflows_installed:
             pytest.skip("Argo Workflows not installed")

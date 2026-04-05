@@ -17,7 +17,7 @@ from rich.console import Console
 from src.utils import create_progress, print_error, print_success
 
 
-def get_kubernetes_client():
+def get_kubernetes_client() -> Any:
     """Get Kubernetes API client.
 
     Returns:
@@ -136,13 +136,13 @@ def get_git_history(days: int) -> list[dict[str, Any]]:
     Returns:
         List of git commit records
     """
-    import subprocess
 
     try:
         since_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
         result = subprocess.run(
             [
-                "git", "log",
+                "git",
+                "log",
                 f"--since={since_date}",
                 "--pretty=format:%H|%an|%ae|%aI|%s",
             ],
@@ -156,13 +156,15 @@ def get_git_history(days: int) -> list[dict[str, Any]]:
             if line:
                 parts = line.split("|", 4)
                 if len(parts) == 5:
-                    commits.append({
-                        "hash": parts[0],
-                        "author": parts[1],
-                        "email": parts[2],
-                        "date": parts[3],
-                        "message": parts[4],
-                    })
+                    commits.append(
+                        {
+                            "hash": parts[0],
+                            "author": parts[1],
+                            "email": parts[2],
+                            "date": parts[3],
+                            "message": parts[4],
+                        }
+                    )
 
         return commits
     except Exception:
@@ -193,7 +195,9 @@ def export_evidence(days: int, output_path: str) -> None:
     end_date = datetime.utcnow()
     start_date = end_date - timedelta(days=days)
 
-    console.print(f"[bold]Exporting evidence from {start_date.date()} to {end_date.date()}[/bold]\n")
+    console.print(
+        f"[bold]Exporting evidence from {start_date.date()} to {end_date.date()}[/bold]\n"
+    )
 
     files: dict[str, str] = {}
     summary: dict[str, int] = {}
@@ -263,10 +267,10 @@ Period: {days} days ({start_date.date()} to {end_date.date()})
 ## Contents
 
 - `manifest.json` - Package manifest with file hashes
-- `falco/alerts.json` - Runtime security alerts ({summary['falco_alerts']} records)
-- `argocd/sync-history.json` - GitOps deployment history ({summary['argocd_syncs']} records)
-- `kyverno/policy-reports.json` - Policy compliance reports ({summary['kyverno_reports']} records)
-- `git/commit-history.json` - Git commit history ({summary['git_commits']} records)
+- `falco/alerts.json` - Runtime security alerts ({summary["falco_alerts"]} records)
+- `argocd/sync-history.json` - GitOps deployment history ({summary["argocd_syncs"]} records)
+- `kyverno/policy-reports.json` - Policy compliance reports ({summary["kyverno_reports"]} records)
+- `git/commit-history.json` - Git commit history ({summary["git_commits"]} records)
 
 ## Verification
 
@@ -290,7 +294,7 @@ Falco alerts include tags for:
 
     console.print()
     print_success(f"Evidence package created: {output_path}")
-    console.print(f"\n[bold]Summary:[/bold]")
+    console.print("\n[bold]Summary:[/bold]")
     console.print(f"  Falco alerts: {summary['falco_alerts']}")
     console.print(f"  ArgoCD syncs: {summary['argocd_syncs']}")
     console.print(f"  Kyverno reports: {summary['kyverno_reports']}")
@@ -468,7 +472,7 @@ def create_evidence_package(evidence_data: dict[str, list], output_path: str) ->
         # Write README
         readme_content = f"""# Evidence Package
 
-Generated: {manifest['generated_at']}
+Generated: {manifest["generated_at"]}
 
 ## Contents
 
