@@ -2,7 +2,7 @@
 # ABOUTME: Script to run E2E tests locally using Kind
 # ABOUTME: Creates a Kind cluster, runs tests, and cleans up
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
